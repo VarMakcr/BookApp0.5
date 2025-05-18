@@ -35,7 +35,10 @@
     
     <h3>Автор: {{ book.Author }}</h3>
     <p>{{ book.About }}</p> 
-    <a href="/create_payment/{{book.id}}" class="link-custom-pay me-2">Цена: {{ book.Cost }} RUB</a>
+    <a class="link-custom-pay me-2">Цена: {{ book.Cost }} RUB</a>
+    <form action="{{ url_for('create_payment', book_id=book.id) }}" method="POST">
+    <button type="submit" class="button-custom">Купить через PayPal</button>
+    </form>
     <!--
     <a href="{{ url_for('read_book', book_id=book.id) }}" class="button-custom me-2">Читать</a><br> 
     -->
