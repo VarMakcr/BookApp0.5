@@ -287,7 +287,7 @@ def read_book(book_id):
         abort(404)
     
 
-#Создание пользователя с уровнем доступа админ если его еще нет(admin!secure!pswrd)
+#Создание пользователя с уровнем доступа админ если его еще нет
 def create_admin_user():
     admin_user = Authorization.query.filter_by(Name='admin').first()
     if not admin_user:
@@ -304,28 +304,26 @@ def create_admin_user():
     return app
 
 
-class Config:
-    PAYPAL_MODE = 'sandbox'  # или 'live' для продакшена
-    PAYPAL_CLIENT_ID = 'ваш_client_id'
-    PAYPAL_CLIENT_SECRET = 'ваш_client_secret'
+#class Config:
+ #   PAYPAL_MODE = 'sandbox'  # или 'live' для продакшена
+ #   PAYPAL_CLIENT_ID = 'ваш_client_id'
+ #   PAYPAL_CLIENT_SECRET = 'ваш_client_secret'
 
 paypalrestsdk.configure({
     "mode": "sandbox",
     "client_id": "AYpJZkrz60Y-YUaLVAQjnHLdYXVe9GmRuGfesTQVlfcQ0wN54FUR7hA4p-ToZh_rs82Sew4W0a9-xAZH",
     "client_secret": "EHSqoNtVWFxWVkLWhg45JeK_03Pne9iS3eTWQWhaNLY1vpvjK7TJ5oMSMKA0rZLAA4bOIkVN4N3kc5S9"})
-#if not all([os.getenv("PAYPAL_CLIENT_ID"), os.getenv("PAYPAL_CLIENT_SECRET")]):
-    #raise ValueError("Не заданы PayPal API-ключи")
+if not all([os.getenv("PAYPAL_CLIENT_ID"), os.getenv("PAYPAL_CLIENT_SECRET")]):
+    raise ValueError("Не заданы PayPal API-ключи")
 
 #Оплата # Маршрут: Создание платежа в PayPal
 @app.route("/create_payment/<int:book_id>")
+@login_required
 def create_payment(book_id):
-    if 'username' not in session:
-        flash('Пожалуйста, войдите в систему, чтобы купить книгу.')
-        return redirect('/Log_in')
     book = Books.query.get_or_404(book_id)
-
+    user = Authorization.query.filter_by(Name=session['username']).first()
     # Создаем заказ в БД
-    order = Order(book_id=book.id)
+    order = Order(book_id=book.id, user_id=user.id )
     db.session.add(order)
     db.session.commit()
 
@@ -339,8 +337,7 @@ def create_payment(book_id):
         },
         "transactions": [{
             "amount": {
-                "total": str(book.Cost),
-                "currency": "USD",
+                "total": str(book.Cost),  "currency": "USD",
             },
             "description": f"Оплата книги: {book.Title}",
         }]
