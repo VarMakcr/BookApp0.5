@@ -415,9 +415,15 @@ def execute_payment(order_id):
             order.status = "paid"
             db.session.commit()
             
-            # Здесь можно добавить логику предоставления доступа к книге
-            # Например, добавить книгу в библиотеку пользователя
-            
+            # Здесь логика предоставления доступа к книге
+            book_id = order.book_id
+
+            bookmark = Bookmark(user_id=user.id, book_id=book_id)
+            db.session.add(bookmark)
+            db.session.commit()
+      
+            flash('Книга добавлена в закладки!')
+  
             return redirect(url_for("payment_success", order_id=order.id))
         else:
             error_msg = payment.error.get('message', 'Неизвестная ошибка PayPal')
