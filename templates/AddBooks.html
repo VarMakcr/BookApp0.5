@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Добавление книги
+{% endblock %}
+
+{% block body %}
+<h1 class="item ms-3">Добавление книги</h1>
+
+<form method="post" class="form-control">
+    <input type="text" name="title" placeholder="Название книги" class="form-control"><br>
+    <input type="text" name="author" placeholder="Автор книги" class="form-control"><br>
+    <input type="text" name="about" placeholder="Описание" class="form-control"><br>
+    <input type="text" name="cover" placeholder="Название файла обложки" class="form-control"><br>
+    <input type="text" name="file_path" placeholder="Название файла книги" class="form-control"><br>
+    <input type="text" name="cost" placeholder="Цена книги" class="form-control"><br>
+    <button class="button-custom" type="submit">Добавить</button>
+</form>
+{% endblock%}

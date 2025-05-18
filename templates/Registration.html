@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Регистрация
+{% endblock %}
+
+{% block body %}
+<h1 class="item ms-3">Зарегистрируйтесь</h1>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+<form method="post" class="form-control">
+    <input type="text" name="Login" placeholder="Вводите логин" class="form-control"><br>
+    <input type="text" name="Password" placeholder="Вводите пароль" class="form-control"><br>
+    <button class="button-custom" type="submit">Зарегистрироваться</button>
+</form>
+{% endblock %}

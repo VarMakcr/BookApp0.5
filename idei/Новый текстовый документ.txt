@@ -1,0 +1,31 @@
+1.Возможность добавлять/изменять/удалять/читать книги      +
+2. Разделение на админа и юзера (роли)			 +
+3. Каталог					 +
+4. Поиск						 +
+5. Закладки					 +
+6. CSS						 +-
+7.Чтение по страницам разных форматов		 -
+8. Переключение тем
+9. Личный кабинет
+10. Аватарка для профиля
+11. Возможность оставлять коментарии
+12. Разделение на роли(user, vip, CC, Admin)
+13. Подписка для отключения рекламы
+14. Форум?
+
+
+
+
+Переключение тем
+  const themePreference = window.localStorage.getItem('global-debug-theme-preference') || 'system'
+
+  let theme
+  if (themePreference === 'dark') {
+    theme = 'dark'
+  } else if (themePreference === 'system') {
+    theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  } else {
+    theme = 'light'
+  }
+
+  document.querySelector("body").dataset.preferredTheme = theme

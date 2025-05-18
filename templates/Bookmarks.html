@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Мои книги
+{% endblock %}
+
+{% block body %}
+    <div class="header_book ms-3">
+        <h1 class="item ms-3">Мои книги</h1> 
+        <div class="text-end me-2"style="margin-top: 10px;">
+            <a href="/Main " class="link-custom">Назад к каталогу</a>  
+        </div>
+    </div>
+  
+    <div class="row ms-3"></div>
+
+    {% if bookmarks|length > 0 %}
+        {% for bookmark in bookmarks %}
+            <div class="col-md-6 item ms-3">
+                <a href="{{ url_for('book_detail', id=bookmark.book.id) }}"><h4>{{ bookmark.book.Title }}</h4></a>
+                <h1 class="title_book "> </h1>
+                <img class = "cover__img" src="{{url_for('static', filename=bookmark.book.Cover)}}">
+                <h4 class="item ">{{ bookmark.book.Author }}</h4>
+            </div>
+        {% endfor %}
+    {%else%}
+        <p class="large_text">На данный момент нет книг</p>
+    {%endif%}
+    </div >
+{% endblock %}
+<footer class="text  text-white py-4">
+  <div class="container">
+    <div class="about-us d-flex flex-wrap align-items-center justify-content-between"> 
+      <div>
+        <h1>Контакты</h1>
+        <p>Телефон: +7999-999-99-99</p>
+        <p>Почта: appbooks@gmail.com</p>
+      </div>
+      <div>
+        <h1>Реквизиты</h1>
+        <a href="/Main"><img class="header__img" src="static/image/telegram_theme.png" alt="Телеграм"></a>
+        <a href="/Main"><img class="header__img" src="static/image/vk_theme.png" alt="ВК"></a>
+      </div>
+    </div>
+  </div>
+</footer>

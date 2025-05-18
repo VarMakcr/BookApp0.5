@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Описание книги
+{% endblock %}
+
+{% block body %}
+<div class="header_book ms-3">
+    <h1 class="title_book">{{ book.Title }}</h1>
+    <div class="text-end me-2"style="margin-top: 10px;">
+        {%if admin: %}
+        <a href="/book_adm/{{book.id}}/del" class="button-custom me-2" onclick="showAlert()">Удалить</a>
+        <a href="/book_adm/{{book.id}}/edit" class="button-custom me-2">Редактировать</a>
+        <script>
+          function showAlert(){
+            alert("Вы действительно хотите удалить?");
+          }
+        </script>
+        {%endif%}
+        <a href="/Main" class="button-custom me-2">Назад к каталогу</a>  
+         
+    </div>
+</div> 
+ <div class="container ms-3">
+    <div style="display: flex; justify-content: space-between;">
+      <img class = "cover__img " src="{{book.cover_url}}" alt="Обложка">
+          {%if 'username' in session and admin == False: %}
+          <form action="{{ url_for('add_bookmark', book_id=book.id) }}" method="post" id="bookmarkForm">
+                  <button type="button" class="image-button" id="bookmarkButton" onclick="toggleBookmark()">
+                      <img id="bookmarkImage" src="{{ url_for('static', filename='image/common_bookmark.png') }}">
+                  </button>
+              </form>
+          {% endif %}
+    </div>
+    
+    <h3>Автор: {{ book.Author }}</h3>
+    <p>{{ book.About }}</p> 
+    <a href="/create_payment/{{book.id}}" class="link-custom-pay me-2">Цена: {{ book.Cost }} RUB</a>
+    <!--
+    <a href="{{ url_for('read_book', book_id=book.id) }}" class="button-custom me-2">Читать</a><br> 
+    -->
+
+
+ </div>
+ <script>
+    function toggleBookmark() {
+        const img = document.getElementById('bookmarkImage');
+        const bookId = {{ book.id }}; // Получаем ID книги из контекста
+
+        fetch(`/add_bookmark/${bookId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => {
+            if (response.ok) {
+                // Меняем изображение в зависимости от состояния
+                if (img.src.includes('common_bookmark.png')) {
+                    img.src = "{{ url_for('static', filename='image/bookmark_get.png') }}"; // Закладка добавлена
+                } else {
+                    img.src = "{{ url_for('static', filename='image/common_bookmark.png') }}"; // Закладка убрана
+                }
+            }
+        });
+    }
+    function onPageLoad() {
+        const img = document.getElementById('bookmarkImage');
+        const bookId = {{ book.id }};
+        
+        // Здесь можно сделать запрос на сервер для проверки наличия закладки
+        fetch(`/check_bookmark/${bookId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.has_bookmark) {
+                img.src = "{{ url_for('static', filename='image/bookmark_get.png') }}"; // Закладка существует
+            } else {
+                img.src = "{{ url_for('static', filename='image/common_bookmark.png') }}"; // Закладка не существует
+            }
+        });
+    }
+    document.addEventListener('DOMContentLoaded', onPageLoad);
+  </script>
+<footer class="text text-white mt-4">
+  <div class="container">
+    <div class="about-us d-flex flex-wrap align-items-center justify-content-between"> 
+      <div>
+        <h1>Контакты</h1>
+        <p>Телефон: +7999-999-99-99</p>
+        <p>Почта: appbooks@gmail.com</p>
+      </div>
+      <div>
+        <h1>Реквизиты</h1>
+        <a href="/Main"><img class="header__img" src="{{ url_for('static', filename='image/telegram_theme.png') }}" alt="Телеграм"></a>
+        <a href="/Main"><img class="header__img" src="{{ url_for('static', filename='image/vk_theme.png') }}" alt="ВК"></a>
+      </div>
+    </div>
+  </div>
+</footer>
+{% endblock %}
+
+
+
+

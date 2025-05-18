@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Авторизация
+{% endblock %}
+
+{% block body %}
+<h1 class="item ms-3">Авторизируйтесь</h1>
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            <p class="item ms-3" >{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+<form method="post" class="form-control">
+    <input type="text" name="Login" placeholder="Вводите логин" class="form-control"><br>
+    <input type="text" name="Password" placeholder="Вводите пароль" class="form-control"><br>
+    <button class="button-custom" type="submit">Войти</button>
+</form>
+{% endblock %}
