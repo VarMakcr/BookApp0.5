@@ -6,6 +6,13 @@
         <h4>Оплата прошла успешно!</h4>
         <p>Спасибо за покупку книги "{{ book.Title }}".</p>
         <p>Сумма: ${{ "%.2f"|format(book.Cost) }}</p>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="item ms-3" >{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
         <a href="{{ url_for('book_detail', id=book.id) }}" class="link-custom">
             Перейти к книге
         </a>

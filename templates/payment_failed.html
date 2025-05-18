@@ -6,6 +6,13 @@
         <h4>Ошибка оплаты</h4>
         <p>При обработке платежа произошла ошибка.</p>
         <p>Пожалуйста, попробуйте еще раз или свяжитесь с поддержкой.</p>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="item ms-3" >{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
         <a href="{{ url_for('book_detail', id=order.book.id) }}" class="btn btn-primary">
             Вернуться к книге
         </a>

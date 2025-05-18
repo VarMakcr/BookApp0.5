@@ -130,15 +130,18 @@ def book_detail(id):
     book = Books.query.get_or_404(id)
     #cover_path = book.Cover
     #cover_url= url_for('static', filename=cover_path)
+    user = Authorization.query.filter_by(Name=username).first()
+
+    existing_bookmark = Bookmark.query.filter_by(user_id=user.id, book_id=id).first()
+
     username = session.get('username')
     if 'username' not in session:
-        return render_template('Book.html', book=book)#, cover_url = cover_url
+        return render_template('Book.html', book=book,existing_bookmark=existing_bookmark)#, cover_url = cover_url
     else:
-        user = Authorization.query.filter_by(Name=username).first()
         admin=False
         if user.Rank == 'Admin':
             admin=True
-        return render_template('Book.html', book=book, username=username, admin=admin) #cover_url = cover_url,
+        return render_template('Book.html', book=book, username=username, admin=admin, existing_bookmark=existing_bookmark) #cover_url = cover_url,
 
 #Добавление книг в базу данных  
 @app.route("/AddBooks", methods=['POST', 'GET'])
