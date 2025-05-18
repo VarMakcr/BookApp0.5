@@ -16,6 +16,10 @@ def create_app():
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI']= 'sqlite:///BooksAppDB.db'
     app.secret_key = os.getenv("FLASK_SECRET_KEY", secrets.token_hex(32))  # 64 символа
+
+    app.config['PAYPAL_MODE'] = 'sandbox'  # 'live' для продакшена
+    app.config['PAYPAL_CLIENT_ID'] = 'AYpJZkrz60Y-YUaLVAQjnHLdYXVe9GmRuGfesTQVlfcQ0wN54FUR7hA4p-ToZh_rs82Sew4W0a9-xAZH'
+    app.config['PAYPAL_CLIENT_SECRET'] = 'EHSqoNtVWFxWVkLWhg45JeK_03Pne9iS3eTWQWhaNLY1vpvjK7TJ5oMSMKA0rZLAA4bOIkVN4N3kc5S9'
     if not app.secret_key:
         raise ValueError("Не задан FLASK_SECRET_KEY")
     # Инициализация расширений
@@ -310,85 +314,154 @@ def create_admin_user():
  #   PAYPAL_CLIENT_SECRET = 'ваш_client_secret'
 
 paypalrestsdk.configure({
-    "mode": "sandbox",
-    "client_id": "AYpJZkrz60Y-YUaLVAQjnHLdYXVe9GmRuGfesTQVlfcQ0wN54FUR7hA4p-ToZh_rs82Sew4W0a9-xAZH",
-    "client_secret": "EHSqoNtVWFxWVkLWhg45JeK_03Pne9iS3eTWQWhaNLY1vpvjK7TJ5oMSMKA0rZLAA4bOIkVN4N3kc5S9"})
-if not all([os.getenv("PAYPAL_CLIENT_ID"), os.getenv("PAYPAL_CLIENT_SECRET")]):
-    raise ValueError("Не заданы PayPal API-ключи")
+    "mode": app.config['PAYPAL_MODE'],
+    "client_id": app.config['PAYPAL_CLIENT_ID'],
+    "client_secret": app.config['PAYPAL_CLIENT_SECRET']
+})
 
-#Оплата # Маршрут: Создание платежа в PayPal
-@app.route("/create_payment/<int:book_id>")
+# Маршрут для создания платежа (обновленная версия)
+@app.route("/create_payment/<int:book_id>", methods=['POST'])
 @login_required
 def create_payment(book_id):
-    book = Books.query.get_or_404(book_id)
-    user = Authorization.query.filter_by(Name=session['username']).first()
-    # Создаем заказ в БД
-    order = Order(book_id=book.id, user_id=user.id )
-    db.session.add(order)
-    db.session.commit()
-
-    # Настройка платежа PayPal
-    payment = paypalrestsdk.Payment({
-        "intent": "sale",
-        "payer": {"payment_method": "paypal"},
-        "redirect_urls": {
-            "return_url": url_for("execute_payment", order_id=order.id, _external=True),
-            "cancel_url": url_for("payment_failed", order_id=order.id, _external=True),
-        },
-        "transactions": [{
-            "amount": {
-                "total": str(book.Cost),  "currency": "USD",
-            },
-            "description": f"Оплата книги: {book.Title}",
-        }]
-    })
     try:
-        if payment.create():# Отправляем запрос в PayPal
-     
+        book = Books.query.get_or_404(book_id)
+        user = Authorization.query.filter_by(Name=session['username']).first()
+        
+        # Проверяем, не купил ли пользователь уже эту книгу
+        existing_order = Order.query.filter_by(
+            user_id=user.id, 
+            book_id=book.id,
+            status='paid'
+        ).first()
+        
+        if existing_order:
+            flash('Вы уже приобрели эту книгу!', 'info')
+            return redirect(url_for('book_detail', id=book.id))
+
+        # Создаем заказ в БД
+        order = Order(
+            book_id=book.id,
+            user_id=user.id,
+            status='pending'
+        )
+        db.session.add(order)
+        db.session.commit()
+
+        # Настройка платежа PayPal
+        payment = paypalrestsdk.Payment({
+            "intent": "sale",
+            "payer": {"payment_method": "paypal"},
+            "redirect_urls": {
+                "return_url": url_for("execute_payment", order_id=order.id, _external=True),
+                "cancel_url": url_for("payment_cancelled", order_id=order.id, _external=True),
+            },
+            "transactions": [{
+                "amount": {
+                    "total": "{0:.2f}".format(float(book.Cost)),
+                    "currency": "USD",
+                },
+                "description": f"Покупка книги: {book.Title}",
+                "item_list": {
+                    "items": [{
+                        "name": book.Title,
+                        "price": "{0:.2f}".format(float(book.Cost)),
+                        "currency": "USD",
+                        "quantity": 1
+                    }]
+                }
+            }]
+        })
+
+        if payment.create():
             order.paypal_payment_id = payment.id
             db.session.commit()
             
-            # Перенаправляем пользователя на страницу PayPal
+            # Находим URL для перенаправления на PayPal
             for link in payment.links:
                 if link.method == "REDIRECT":
-                    return redirect(link.href)
+                    redirect_url = str(link.href)
+                    return redirect(redirect_url)
+            
+            flash('Не удалось получить ссылку для оплаты', 'error')
         else:
-            flash(f"Ошибка PayPal: {payment.error['message']}", "error")  # Детализация
-        return render_template('Book.html', book_id=book.id)
-    
+            error_msg = payment.error.get('message', 'Неизвестная ошибка PayPal')
+            flash(f'Ошибка при создании платежа: {error_msg}', 'error')
+            app.logger.error(f"PayPal error: {payment.error}")
+            
     except Exception as e:
-        flash(f"Системная ошибка: {str(e)}", "error")
+        db.session.rollback()
+        flash('Произошла ошибка при обработке платежа', 'error')
+        app.logger.error(f"Payment processing error: {str(e)}")
     
-# Маршрут: Подтверждение платежа (после возврата с PayPal)
-@app.route("/execute-payment/<int:order_id>")
-def execute_payment(order_id):
-    order = Order.query.get_or_404(order_id)
-    payer_id = request.args.get("PayerID")
-    
-    payment = paypalrestsdk.Payment.find(order.paypal_payment_id)
-    
-    if payment.execute({"payer_id": payer_id}):  # Подтверждаем платеж
-        order.status = "paid"
-        db.session.commit()
-        return redirect(url_for("payment_success", order_id=order.id))
-    else:
-        flash("Ошибка оплаты", "error")
-        return redirect(url_for("payment_failed", order_id=order.id))
+    return redirect(url_for('book_detail', id=book.id))
 
-# Маршрут: Успешная оплата
-@app.route("/success/<int:order_id>")
+# Маршрут для подтверждения платежа (обновленный)
+@app.route("/execute_payment/<int:order_id>")
+@login_required
+def execute_payment(order_id):
+    try:
+        order = Order.query.get_or_404(order_id)
+        user = Authorization.query.filter_by(Name=session['username']).first()
+        
+        # Проверяем, что заказ принадлежит текущему пользователю
+        if order.user_id != user.id:
+            flash('Этот заказ не принадлежит вам', 'error')
+            return redirect(url_for('Main'))
+
+        payer_id = request.args.get("PayerID", "")
+        payment = paypalrestsdk.Payment.find(order.paypal_payment_id)
+
+        if payment.execute({"payer_id": payer_id}):
+            order.status = "paid"
+            db.session.commit()
+            
+            # Здесь можно добавить логику предоставления доступа к книге
+            # Например, добавить книгу в библиотеку пользователя
+            
+            return redirect(url_for("payment_success", order_id=order.id))
+        else:
+            error_msg = payment.error.get('message', 'Неизвестная ошибка PayPal')
+            flash(f'Ошибка при выполнении платежа: {error_msg}', 'error')
+            app.logger.error(f"PayPal execute error: {payment.error}")
+            
+    except Exception as e:
+        db.session.rollback()
+        flash('Произошла ошибка при подтверждении платежа', 'error')
+        app.logger.error(f"Execute payment error: {str(e)}")
+    
+    return redirect(url_for('payment_failed', order_id=order.id))
+# Маршрут для успешной оплаты
+@app.route("/payment_success/<int:order_id>")
+@login_required
 def payment_success(order_id):
     order = Order.query.get_or_404(order_id)
-    return render_template("success.html", order=order)
+    book = Books.query.get_or_404(order.book_id)
+    return render_template("payment_success.html", 
+                         order=order, 
+                         book=book,
+                         username=session.get('username'))
 
-# Маршрут: Отмена платежа
-@app.route("/failed/<int:order_id>")
+# Маршрут для отмененного платежа
+@app.route("/payment_cancelled/<int:order_id>")
+@login_required
+def payment_cancelled(order_id):
+    order = Order.query.get_or_404(order_id)
+    order.status = "cancelled"
+    db.session.commit()
+    return render_template("payment_cancelled.html", 
+                         order=order,
+                         username=session.get('username'))
+
+# Маршрут для неудачного платежа
+@app.route("/payment_failed/<int:order_id>")
+@login_required
 def payment_failed(order_id):
     order = Order.query.get_or_404(order_id)
     order.status = "failed"
     db.session.commit()
-    return "Платеж отменен", 400
-
+    return render_template("payment_failed.html", 
+                         order=order,
+                         username=session.get('username'))
 
 if __name__ == '__main__':
     with app.app_context():

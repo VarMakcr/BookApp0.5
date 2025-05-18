@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="alert alert-warning">
+        <h4>Оплата отменена</h4>
+        <p>Вы отменили оплату книги "{{ order.book.Title }}".</p>
+        <a href="{{ url_for('book_detail', id=order.book.id) }}" class="btn btn-primary">
+            Вернуться к книге
+        </a>
+    </div>
+</div>
+{% endblock %}
