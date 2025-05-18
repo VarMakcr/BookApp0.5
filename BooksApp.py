@@ -21,10 +21,6 @@ def create_app():
     # Инициализация расширений
     db.init_app(app)
     
-    # Регистрация blueprint
-    app.register_blueprint(auth_bp, url_prefix='/auth')
-    app.register_blueprint(admin_bp, url_prefix='/admin')
-
     return app
 
 app = create_app()
