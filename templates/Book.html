@@ -7,7 +7,7 @@
 {% block body %}
 <div class="header_book ms-3">
     <h1 class="title_book">{{ book.Title }}</h1>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+    <div class="text-end me-2"style="margin-top: 10px;">
         {%if admin: %}
         <a href="/book_adm/{{book.id}}/del" class="button-custom me-2" onclick="showAlert()">Удалить</a>
         <a href="/book_adm/{{book.id}}/edit" class="button-custom me-2">Редактировать</a>
@@ -38,10 +38,12 @@
     {%if admin or existing_bookmark: %} 
       <a href="{{ url_for('read_book', book_id=book.id) }}" class="button-custom me-2">Читать</a><br>
     {%endif%}
-    <a class="link-custom-pay me-2">Цена: {{ book.Cost }} RUB</a>
-    <form action="{{ url_for('create_payment', book_id=book.id) }}" method="POST">
-    <button type="submit" class="button-custom me-2">Купить через PayPal</button>
-    </form>
+    {%if existing_bookmark == False: %}
+      <a class="link-custom-pay me-2">Цена: {{ book.Cost }} RUB</a>
+      <form action="{{ url_for('create_payment', book_id=book.id) }}" method="POST">
+      <button type="submit" class="button-custom me-2">Купить через PayPal</button>
+      </form>
+    {%endif%}
     <!--
           {%if 'username' in session and admin == False and existing_bookmark == False: %}
           <form action="{{ url_for('add_bookmark', book_id=book.id) }}" method="post" id="bookmarkForm">

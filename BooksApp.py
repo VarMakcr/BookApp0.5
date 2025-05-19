@@ -64,13 +64,13 @@ def Registration():
        
         if Authorization.query.filter_by(Name=username).first():
             flash('Данный логин уже существует!')
-            return redirect(url_for('/Registration')) 
+            return redirect('/Registration') 
         if len(username) < 4:
             flash('Логин должен содержать не менее 4 символов.')
-            return redirect(url_for('/Registration'))
+            return redirect('/Registration')
         if len(pswrd_check) < 6:
             flash('Пароль должен содержать не менее 6 символов.')
-            return redirect(url_for('/Registration'))
+            return redirect('/Registration')
         
         pswrd = generate_password_hash(request.form['Password'])
         rank = "User"
