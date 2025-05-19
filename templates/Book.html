@@ -38,10 +38,12 @@
     {%if admin or existing_bookmark: %} 
       <a href="{{ url_for('read_book', book_id=book.id) }}" class="button-custom me-2">Читать</a><br>
     {%else%}
-      <a class="link-custom-pay ">Цена: {{ book.Cost }} USD</a>
-      <form action="{{ url_for('create_payment', book_id=book.id) }}" method="POST">
-      <button type="submit" class="button-custom ">Купить через PayPal</button>
-      </form>
+      <div style="display: flex; justify-content: space-between;">
+        <a class="link-custom-pay ">Цена: {{ book.Cost }} USD</a>
+        <form action="{{ url_for('create_payment', book_id=book.id) }}" method="POST">
+        <button type="submit" class="button-custom ">Купить через PayPal</button>
+        </form>
+      </div>
     {%endif%}
 
 
