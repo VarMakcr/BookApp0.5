@@ -134,12 +134,13 @@ def book_detail(id):
     
     user = Authorization.query.filter_by(Name=username).first()
 
-    existing_bookmark = Bookmark.query.filter_by(user_id=user.id, book_id=id).first()
+    
 
     
     if 'username' not in session:
-        return render_template('Book.html', book=book,existing_bookmark=existing_bookmark)#, cover_url = cover_url
+        return render_template('Book.html', book=book,existing_bookmark=False)#, cover_url = cover_url
     else:
+        existing_bookmark = Bookmark.query.filter_by(user_id=user.id, book_id=id).first()
         admin=False
         if user.Rank == 'Admin':
             admin=True

@@ -39,7 +39,7 @@
       <a href="{{ url_for('read_book', book_id=book.id) }}" class="button-custom me-2">Читать</a><br>
     {%endif%}
     {%if existing_bookmark == False: %}
-      <a class="link-custom-pay me-2">Цена: {{ book.Cost }} RUB</a>
+      <a class="link-custom-pay me-2">Цена: {{ book.Cost }} USD</a>
       <form action="{{ url_for('create_payment', book_id=book.id) }}" method="POST">
       <button type="submit" class="button-custom me-2">Купить через PayPal</button>
       </form>
