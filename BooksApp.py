@@ -191,7 +191,7 @@ def BookUpdate(id):
         edit.About = request.form['about']
         edit.File_path = request.form['file_path']
         edit.Cover = request.form['cover']
-
+        edit.Cost = request.form['cost']
         try:
             db.session.commit()
             return redirect('/')
