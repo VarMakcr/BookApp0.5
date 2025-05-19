@@ -14,7 +14,7 @@
                 
                 <img class="cover__img" src="{{url_for('static', filename=book.Cover)}}" alt="{{book.Title}}">
                 <p>{{book.Author}}</p>
-                <a class="link-custom-pay">Цена: {{book.Cost} USD}</a>
+                <a class="link-custom-pay">Цена: {{book.Cost}} USD </a>
             </div>
             {% endfor %}
         {%else%}
