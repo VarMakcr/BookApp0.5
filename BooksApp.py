@@ -134,9 +134,6 @@ def book_detail(id):
     
     user = Authorization.query.filter_by(Name=username).first()
 
-    
-
-    
     if 'username' not in session:
         return render_template('Book.html', book=book,existing_bookmark=False)#, cover_url = cover_url
     else:
