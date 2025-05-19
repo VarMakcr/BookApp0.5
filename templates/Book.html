@@ -9,8 +9,8 @@
     <h1 class="title_book">{{ book.Title }}</h1>
     <div class="text-end me-2"style="margin-top: 10px;">
         {%if admin: %}
-        <a href="/book_adm/{{book.id}}/del" class="button-custom me-2" onclick="showAlert()">Удалить</a>
-        <a href="/book_adm/{{book.id}}/edit" class="button-custom me-2">Редактировать</a>
+        <a href="/book/{{book.id}}/del" class="button-custom me-2" onclick="showAlert()">Удалить</a>
+        <a href="/book/{{book.id}}/edit" class="button-custom me-2">Редактировать</a>
         <script>
           function showAlert(){
             alert("Вы действительно хотите удалить?");
