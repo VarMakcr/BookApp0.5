@@ -129,8 +129,6 @@ def Main():
 def book_detail(id):
     book = Books.query.get_or_404(id)
     username = session.get('username')
-    #cover_path = book.Cover
-    #cover_url= url_for('static', filename=cover_path)
     
     user = Authorization.query.filter_by(Name=username).first()
 
@@ -233,7 +231,7 @@ def add_bookmark(book_id):
     
     str_id = str(book_id)
     flash('Книга добавлена в закладки!')
-    return redirect('/book_log/'+str_id, )
+    return redirect('/book/'+str_id, )
 
 #Удаление закладок
 @app.route('/remove_bookmark/<int:bookmark_id>', methods=['POST'])
