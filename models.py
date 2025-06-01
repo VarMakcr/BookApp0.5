@@ -1,5 +1,6 @@
 from flask import url_for
 from extension import db
+import os
 
 #База данных пользователей
 class Authorization(db.Model):
@@ -19,12 +20,15 @@ class Books(db.Model):
     Cost = db.Column(db.Float, nullable = False)
     @property
     def cover_url(self):
-        return url_for('static', filename=self.Cover)
+        # Заменяем обратные слеши на прямые
+        clean_path = self.Cover.replace('\\', '/')
+        return url_for('static', filename=f'uploads/{clean_path}')
 
     @property
-    def file_url(self):
-        return url_for('static', filename=self.File_path)
-    pass
+    def book_file_url(self):
+        clean_path = self.File_path.replace('\\', '/')
+        return url_for('static', filename=f'uploads/{clean_path}')
+    
 #База данных закладок пользователей
 class Bookmark(db.Model):
     id = db.Column(db.Integer, primary_key=True)  

@@ -3,58 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <title>{% block title %}{% endblock%}</title>
+    <style>
+        :root {
+            --primary-color: #d6a82a;
+            --primary-hover: #e6b824;
+            --text-color: white;
+            --shadow: 0 0 5px rgba(195, 167, 77, 0.5);
+            --shadow-hover: 0 0 15px rgba(195, 167, 77, 0.8);
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .content-wrapper {
+            flex: 1;
+        }
+        
+        footer {
+            flex-shrink: 0;
+            width: 100%;
+        }
+        /* Базовые стили */
+        body {
+            font-family: 'Arial', sans-serif;
+        }
+
+        .header__img {
+            height: 40px;
+            width: auto;
+        }
+        
+        .container2 {
+            padding: 20px 0;
+        }
+
+        /* Общие стили для кнопок и ссылок */
+        .button-custom,
+        .link-custom,
+        .dropdown-toggle {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            padding: 12px 24px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            border: none;
+            display: inline-block;
+            margin: 0 10px 10px 0;
+        }
+
+        .button-custom:hover,
+        .link-custom:hover,
+        .dropdown-toggle:hover,
+        .dropdown-toggle:focus {
+            background-color: var(--primary-hover);
+            color: var(--text-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* Стили для dropdown */
+        .dropdown-menu {
+            border-radius: 5px;
+            border: none;
+            box-shadow: var(--shadow-hover);
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .dropdown-item {
+            padding: 12px 24px;
+            transition: all 0.3s ease;
+            color: #333;
+        }
+        
+        .dropdown-item:hover {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+        }
+        
+        .dropdown-divider {
+            margin: 0;
+        }
+
+        /* Адаптация */
+        @media (max-width: 992px) {
+            .header-nav {
+                order: 3;
+                width: 100%;
+                margin-top: 15px;
+            }
+            
+            .header-search {
+                order: 2;
+                width: 100%;
+                margin: 15px 0;
+            }
+            
+            .header-auth {
+                order: 1;
+                margin-left: auto;
+            }
+            
+            .link-custom, 
+            .button-custom,
+            .dropdown-toggle {
+                margin: 5px 0;
+                width: 100%;
+                display: block;
+            }
+            
+            .dropdown-menu {
+                width: 100%;
+            }
+        }
+
+        /* Форма поиска */
+        .form-control-dark {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .form-control-dark:focus {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(214, 168, 42, 0.25);
+            color: white;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
+   <div class="content-wrapper">
+        <div class="container">
+        <!-- Header -->
         <header class="p-3 text-bg-dark">
-          <div class="d-flex flex-wrap align-items-center justify-content-between">
-            <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
-                <img class="header__img" src="{{ url_for('static', filename='image/LogoD.png') }}" alt="Logo">
-            </a>
+            <div class="d-flex flex-wrap align-items-center justify-content-between">
+                <!-- Логотип -->
+                <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+                    <img class="header__img" src="{{ url_for('static', filename='image/LogoD.png') }}" alt="Logo">
+                </a>
 
-            <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-                <li><a href="{{ url_for('Main') }}" class="link-custom">Главная</a></li>
-                {% if 'username' in session: %}
-                  {% if admin %}
-                    <li><a href="{{url_for('AddBooks')}}" class="link-custom">Добавить книгу</a></li>
-                  {% else %}
-                    <li><a href="{{url_for('Bookmarks')}}" class="link-custom">Мои книги</a></li>
-                  {%endif%}
-                {%endif%}
-            </ul>
+                <!-- Основная навигация -->
+                <ul class="nav nav-pills header-nav me-lg-auto">
+                    <li class="nav-item me-2"><a href="{{ url_for('Main') }}" class="nav-link link-custom">Главная</a></li>
+                    {% if 'username' in session %}
+                        {% if admin %}
+                            <li class="nav-item"><a href="{{url_for('AddBooks')}}" class="nav-link link-custom">Добавить книгу</a></li>
+                        {% else %}
+                            <li class="nav-item"><a href="{{url_for('Bookmarks')}}" class="nav-link link-custom">Мои книги</a></li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
 
-            <form role="search" id="searchForm" action="{{ url_for('search_books') }}" method="get" class="d-flex align-items-center">
-                <input type="search" name="title" class="form-control form-control-dark text-bg-dark ms-2" placeholder="Поиск" required>
-                <button type="submit" class="button-custom ms-2">Найти</button>
-            </form>
+                <!-- Поиск -->
+                <form class="d-flex header-search" action="{{ url_for('search_books') }}" method="get">
+                    <input type="search" name="title" class="form-control form-control-dark me-2" placeholder="Поиск" required>
+                    <button type="submit" class="button-custom">Найти</button>
+                </form>
 
-            {% if 'username' not in session: %}
-            <div class="ms-auto"> 
-              <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-end mb-md-0">
-                  <li><button id="Login" type="button" class="button-custom">Войти</button></li>
-                  <li><button id="Reg" type="button" class="button-custom">Зарегистрироваться</button></li>
-              </ul>
+                <!-- Авторизация -->
+                <div class="header-auth">
+                    {% if 'username' not in session %}
+                        <a href="{{url_for('Log_in')}}" class="button-custom">Войти</a>
+                        <a href="{{url_for('Registration')}}" class="button-custom">Регистрация</a>
+                    {% else %}
+                        <div class="dropdown" style="display: inline-block;">
+                            <button class="button-custom dropdown-toggle" 
+                                    type="button" 
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                {{username}}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                              {% if admin ==false %}
+                                <li><a class="dropdown-item" href="{{url_for('Bookmarks')}}">Мои книги</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/">Личный кабинет</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+                                <li><a class="dropdown-item" href="{{url_for('logout')}}">Выйти</a></li>
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
-            {%else%}
-            <div class="ms-auto"> 
-              <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-end mb-md-0">
-                  <li><a class="link-custom">{{username}}</a></li>
-                  <li><a href="{{url_for('logout')}}" class="link-custom">Выйти</a></li>
-              </ul>
-            {%endif%}
-        </div>  
         </header>
-        <div class="container2"> 
-          {% block body %}{% endblock%}
+
+     <div class="container2"> 
+                {% block body %}{% endblock %}
+            </div>
         </div>
-        <script>
-          document.getElementById("Login").addEventListener("click", function() { window.location.href = "{{url_for('Log_in')}}"; });
-          document.getElementById("Reg").addEventListener("click", function() { window.location.href = "{{url_for('Registration')}}"; });
-        </script> 
-    
     </div>
+  <div class="container">
+    <!-- Футер -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                 <div class="col-md-6 mb-4 mb-md-0">
+                    <h4 class="mb-3" style="color: #d6a82a;">Контакты</h4>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-phone me-2" style="color: #d6a82a;"></i>
+                            +7999-999-99-99
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-envelope me-2" style="color: #d6a82a;"></i>
+                            appbooks@gmail.com
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="col-md-6 text-md-end">
+                    <h4 class="mb-3" style="color: var(--primary-color);">Мы в соцсетях</h4>
+                    
+                        <a>
+                            <img src="{{ url_for('static', filename='image/telegram_theme.png') }}" alt="Telegram" style="height: 40px;">
+                        </a>
+                        <a href="/">
+                            <img src="{{ url_for('static', filename='image/vk_theme.png') }}" alt="VK" style="height: 40px;">
+                        </a>
+                    
+                </div>
+            </div>
+            
+            <div class="text-center pt-3 mt-3" style="border-top: 1px solid var(--primary-color);">
+                <p class="mb-0">© 2023 AppBooks. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
+            var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+                return new bootstrap.Dropdown(dropdownToggleEl)
+            });
+        });
+    </script>
 </body>
 </html>

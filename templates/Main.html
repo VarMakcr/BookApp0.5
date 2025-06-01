@@ -12,30 +12,16 @@
             <div class="col-md-6 item">
                 <a href="{{ url_for('book_detail', id=book.id) }}"><h4>{{book.Title}}</h4></a>
                 
-                <img class="cover__img" src="{{url_for('static', filename=book.Cover)}}" alt="{{book.Title}}">
+                <img class="cover__img" src="{{book.cover_url}}" alt="{{book.Title}}">
                 <p>{{book.Author}}</p>
-                <a class="link-custom-pay">Цена: {{book.Cost}} USD </a>
+                  <form action="{{ url_for('create_payment', book_id=book.id) }}" method="POST">
+                    <button type="submit" class="link-custom-pay ">Цена: {{ book.Cost }} USD</button>
+                  </form>
             </div>
             {% endfor %}
         {%else%}
         <p class="large_text">На данынй момент нет доступных для чтения книг</p>
         {%endif%}
     </div>
-<footer class="text  text-white py-4">
-  <div class="container">
-    <div class="about-us d-flex flex-wrap align-items-center justify-content-between"> 
-      <div>
-        <h1>Контакты</h1>
-        <p>Телефон: +7999-999-99-99</p>
-        <p>Почта: appbooks@gmail.com</p>
-      </div>
-      <div>
-        <h1>Реквизиты</h1>
-        <a href="/Main"><img class="header__img" src="static/image/telegram_theme.png" alt="Телеграм"></a>
-        <a href="/Main"><img class="header__img" src="static/image/vk_theme.png" alt="ВК"></a>
-      </div>
-    </div>
-  </div>
-</footer>
 
 {% endblock%}

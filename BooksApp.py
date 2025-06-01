@@ -6,7 +6,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import logging
 import paypalrestsdk
-
+import uuid
+from werkzeug.utils import secure_filename
 from extension import db
 from models import Authorization, Books, Bookmark, Order
 
@@ -20,6 +21,11 @@ def create_app():
     app.config['PAYPAL_MODE'] = 'sandbox'  # 'live' для продакшена
     app.config['PAYPAL_CLIENT_ID'] = 'AYpJZkrz60Y-YUaLVAQjnHLdYXVe9GmRuGfesTQVlfcQ0wN54FUR7hA4p-ToZh_rs82Sew4W0a9-xAZH'
     app.config['PAYPAL_CLIENT_SECRET'] = 'EHSqoNtVWFxWVkLWhg45JeK_03Pne9iS3eTWQWhaNLY1vpvjK7TJ5oMSMKA0rZLAA4bOIkVN4N3kc5S9'
+    app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')
+    app.config['ALLOWED_EXTENSIONS'] = {'pdf'}
+    app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB
+    os.makedirs(os.path.join(app.static_folder, 'uploads', 'covers'), exist_ok=True)
+    os.makedirs(os.path.join(app.static_folder, 'uploads', 'books'), exist_ok=True)
     if not app.secret_key:
         raise ValueError("Не задан FLASK_SECRET_KEY")
     # Инициализация расширений
@@ -131,77 +137,198 @@ def book_detail(id):
     username = session.get('username')
     
     user = Authorization.query.filter_by(Name=username).first()
-
+    admin = adm()
     if 'username' not in session:
         return render_template('Book.html', book=book,existing_bookmark=False)#, cover_url = cover_url
     else:
         existing_bookmark = Bookmark.query.filter_by(user_id=user.id, book_id=id).first()
-        admin=False
-        if user.Rank == 'Admin':
-            admin=True
+        
         return render_template('Book.html', book=book, username=username, admin=admin, existing_bookmark=existing_bookmark) #cover_url = cover_url,
 
-#Добавление книг в базу данных  
+#Добавление книг в базу данных
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']  
+
 @app.route("/AddBooks", methods=['POST', 'GET'])
 @admin_required
 def AddBooks():
     username = session.get('username')
+    
     if request.method == 'POST':
-        title = request.form['title']
-        author = request.form['author']
-        about = request.form['about']
-        file_path = "book/"+request.form['file_path']
-        cover = "Cover/"+request.form['cover']
-        cost = request.form['cost'] 
-        Add = Books(Title = title, Cover = cover, Author = author, About = about, File_path = file_path, Cost = cost )
-        if Books.query.filter_by(Title=title).first():
-            return "Данная книга уже существует!"
         try:
-            db.session.add(Add)
+            # Проверка и обработка текстовых данных
+            title = request.form.get('title')
+            author = request.form.get('author')
+            about = request.form.get('about')
+            cost = float(request.form.get('cost', 0))
+            
+            if not all([title, author, about]):
+                flash('Все текстовые поля должны быть заполнены!', 'error')
+                return redirect(url_for('AddBooks'))
+            
+            if cost <= 0:
+                flash('Цена должна быть больше нуля!', 'error')
+                return redirect(url_for('AddBooks'))
+            
+            # Проверка на существующую книгу
+            if Books.query.filter_by(Title=title).first():
+                flash('Книга с таким названием уже существует!', 'error')
+                return redirect(url_for('AddBooks'))
+            
+            # Обработка файла обложки
+            if 'cover' not in request.files:
+                flash('Не выбрана обложка книги!', 'error')
+                return redirect(url_for('AddBooks'))
+                
+            cover_file = request.files['cover']
+            if cover_file.filename == '':
+                flash('Не выбрана обложка книги!', 'error')
+                return redirect(url_for('AddBooks'))
+            
+            # Обработка файла книги
+            if 'book_file' not in request.files:
+                flash('Не выбран файл книги!', 'error')
+                return redirect(url_for('AddBooks'))
+                
+            book_file = request.files['book_file']
+            if book_file.filename == '':
+                flash('Не выбран файл книги!', 'error')
+                return redirect(url_for('AddBooks'))
+            
+            # Сохранение файлов
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+            
+            # Сохранение обложки
+            cover_ext = secure_filename(cover_file.filename).split('.')[-1]
+            cover_filename = f"cover_{uuid.uuid4().hex}.{cover_ext}"
+            cover_path = os.path.join('covers', cover_filename).replace('\\', '/')
+            cover_file.save(os.path.join(app.config['UPLOAD_FOLDER'], cover_path))
+            
+            # Сохранение книги
+            if not allowed_file(book_file.filename):
+                flash('Неподдерживаемый формат файла книги!', 'error')
+                return redirect(url_for('AddBooks'))
+                
+            book_ext = secure_filename(book_file.filename).split('.')[-1]
+            book_filename = f"book_{uuid.uuid4().hex}.{book_ext}"
+            book_path = os.path.join('books', book_filename).replace('\\', '/')
+            book_file.save(os.path.join(app.config['UPLOAD_FOLDER'], book_path))
+            
+            # Создание записи в БД
+            new_book = Books(
+                Title=title,
+                Author=author,
+                About=about,
+                Cover=cover_path,
+                File_path=book_path,
+                Cost=cost
+            )
+            
+            db.session.add(new_book)
             db.session.commit()
-            return redirect('/')
-        except:
-            return 'При добавлении книги что-то пошло не так'
-    else:        
-        return render_template('AddBooks.html', username=username)
+            
+            flash('Книга успешно добавлена!', 'success')
+            return redirect(url_for('Main'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Ошибка при добавлении книги: {str(e)}', 'error')
+            app.logger.error(f"Error adding book: {str(e)}")
+            return redirect(url_for('AddBooks'))
+    
+    return render_template('AddBooks.html', username=username)
 
 #Удаление книг
 @app.route("/book/<int:id>/del")
 @admin_required
 def delete_book(id):
-    del_book = Books.query.get_or_404(id)
+    book = Books.query.get_or_404(id)
+
     try:
-        db.session.delete(del_book)
+        # Удаление файлов
+        cover_path = os.path.join(app.static_folder, 'uploads', book.Cover)
+        book_path = os.path.join(app.static_folder, 'uploads', book.File_path)
+        
+        if os.path.exists(cover_path):
+            os.remove(cover_path)
+        if os.path.exists(book_path):
+            os.remove(book_path)
+        
+        # Удаление из БД
+        db.session.delete(book)
         db.session.commit()
-        return redirect('/')
-    except:
-        return 'При удалении книги что-то пошло не так'    
+        
+        flash('Книга успешно удалена!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Ошибка при удалении книги: {str(e)}', 'error')
+        app.logger.error(f"Error deleting book {id}: {str(e)}")
+    
+    return redirect(url_for('Main'))    
 
 #Изменение книг
 @app.route("/book/<int:id>/edit", methods=['POST', 'GET'])
 @admin_required
 def BookUpdate(id):
-    username = session.get('username')
-    edit = Books.query.get_or_404(id)
+    book = Books.query.get_or_404(id)
+    
     if request.method == 'POST':
-        edit.Title = request.form['title']
-        edit.Author = request.form['author']
-        edit.About = request.form['about']
-        edit.File_path = request.form['file_path']
-        edit.Cover = request.form['cover']
-        edit.Cost = request.form['cost']
         try:
+            # Обновляем текстовые данные
+            book.Title = request.form.get('title')
+            book.Author = request.form.get('author')
+            book.About = request.form.get('about')
+            book.Cost = float(request.form.get('cost', 0))
+            
+            # Обработка новой обложки
+            if 'cover' in request.files and request.files['cover'].filename:
+                cover_file = request.files['cover']
+                if cover_file.filename:
+                    # Удаляем старую обложку
+                    old_cover = os.path.join(app.config['UPLOAD_FOLDER'], book.Cover)
+                    if os.path.exists(old_cover):
+                        os.remove(old_cover)
+                    
+                    # Сохраняем новую
+                    cover_ext = secure_filename(cover_file.filename).split('.')[-1]
+                    cover_filename = f"cover_{uuid.uuid4().hex}.{cover_ext}"
+                    cover_path = os.path.join('covers', cover_filename)
+                    cover_file.save(os.path.join(app.config['UPLOAD_FOLDER'], cover_path))
+                    book.Cover = cover_path.replace('\\', '/')
+            
+            # Обработка нового файла книги
+            if 'book_file' in request.files and request.files['book_file'].filename:
+                book_file = request.files['book_file']
+                if book_file.filename:
+                    # Удаляем старый файл
+                    old_file = os.path.join(app.config['UPLOAD_FOLDER'], book.File_path)
+                    if os.path.exists(old_file):
+                        os.remove(old_file)
+                    
+                    # Сохраняем новый
+                    book_ext = secure_filename(book_file.filename).split('.')[-1]
+                    book_filename = f"book_{uuid.uuid4().hex}.{book_ext}"
+                    book_path = os.path.join('books', book_filename)
+                    book_file.save(os.path.join(app.config['UPLOAD_FOLDER'], book_path))
+                    book.File_path = book_path.replace('\\', '/')
+            
             db.session.commit()
-            return redirect('/')
-        except:
-            return 'При изменении что-то пошло не так'
-    else:   
-        
-        return render_template('Book_edit.html', edited=edit, username=username)
+            flash('Книга успешно обновлена!', 'success')
+            return redirect(url_for('book_detail', id=book.id))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Ошибка при обновлении книги: {str(e)}', 'error')
+            app.logger.error(f"Error updating book {id}: {str(e)}")
+    
+    return render_template('Book_edit.html', 
+                         book=book, 
+                         username=session.get('username'))
 
 #Закладки
-@login_required
 @app.route('/Bookmarks')
+@login_required
 def Bookmarks():
     username = session.get('username')
     user = Authorization.query.filter_by(Name=session['username']).first()
@@ -227,8 +354,6 @@ def add_bookmark(book_id):
     db.session.add(bookmark)
     db.session.commit()
 
-   
-    
     str_id = str(book_id)
     flash('Книга добавлена в закладки!')
     return redirect('/book/'+str_id, )
@@ -281,15 +406,28 @@ def search_books():
     else:
         return render_template('Main.html', books=books, username=username)  # Перенаправление для обычного пользователя
 
+def adm():
+    username=session.get('username')
+    if 'username' not in session:
+        return False 
+    user = Authorization.query.filter_by(Name=username).first()
+    if user.Rank == 'Admin':
+       return True     
+    return False
 
 #Чтение книг
 @app.route('/read_book/<int:book_id>')
 @login_required
 def read_book(book_id):
     book = Books.query.get_or_404(book_id)
-
-    if not os.path.exists(os.path.join(app.static_folder, book.File_path)):
-        abort(404)
+    username=session.get('username')
+    admin = adm()
+    return render_template('read_book.html',
+                            book=book,
+                            pdf_url=book.book_file_url,
+                            username=username,
+                            admin=admin)
+    
     
 
 #Создание пользователя с уровнем доступа админ если его еще нет
@@ -309,18 +447,13 @@ def create_admin_user():
     return app
 
 
-#class Config:
- #   PAYPAL_MODE = 'sandbox'  # или 'live' для продакшена
- #   PAYPAL_CLIENT_ID = 'ваш_client_id'
- #   PAYPAL_CLIENT_SECRET = 'ваш_client_secret'
-
 paypalrestsdk.configure({
     "mode": app.config['PAYPAL_MODE'],
     "client_id": app.config['PAYPAL_CLIENT_ID'],
     "client_secret": app.config['PAYPAL_CLIENT_SECRET']
 })
 
-# Маршрут для создания платежа (обновленная версия)
+# Маршрут для создания платежа 
 @app.route("/create_payment/<int:book_id>", methods=['POST'])
 @login_required
 def create_payment(book_id):
@@ -396,7 +529,7 @@ def create_payment(book_id):
     
     return redirect(url_for('book_detail', id=book.id))
 
-# Маршрут для подтверждения платежа (обновленный)
+# Маршрут для подтверждения платежа
 @app.route("/execute_payment/<int:order_id>")
 @login_required
 def execute_payment(order_id):

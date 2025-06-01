@@ -1,139 +1,255 @@
-body{
+/* Основные переменные */
+:root {
+    --primary-color: #d6a82a;
+    --primary-hover: #e6b824;
+    --text-color: white;
+    --shadow: 0 0 5px rgba(195, 167, 77, 0.5);
+    --shadow-hover: 0 0 15px rgba(195, 167, 77, 0.8);
+    --success-color: #0f9b22;
+    --success-hover: #2ad641;
+}
+
+/* Общие стили */
+body {
     background-color: rgb(255, 255, 255);
-    
-    margin: 0; /* Убираем отступы */
-    padding: 0; /* Убираем внутренние отступы */
-    height: 100vh; /* Высота вьюпорта */
-    background-image: url(/static/image/background.jpg);/*  Путь к изображению фона */
-    background-size: cover; /* Изображение будет покрывать весь экран */
-    background-position: center; /* Центрируем изображение */
-    background-repeat: repeat; /* Не повторяем изображение */
-}
-.container2{
-    background-color: white;
-}
-.header__img{
-    height: 48px;
-}
-.cover__img{
-    max-width: 50%; 
-    height: auto;  
-    margin-bottom: 10px;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background-image: url(/static/image/background.jpg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    font-family: 'Arial', sans-serif;
 }
 .header_book {
     display: flex;                 /* Включаем Flexbox */
     justify-content: space-between; /* Распределяем элементы по ширине */
     align-items: center;          /* Центрируем по вертикали */
 }
-.title_book {
-    margin-bottom: 10px;                  /* Убираем отступы у заголовка */
-}
-.button_Redact{
-    padding: 10px 20px;          /* Добавляем отступы для кнопки */
-    background-color: #000000;   /* Цвет фона кнопки */
-    color: white;                 /* Цвет текста кнопки */
-    border: none;                 /* Убираем границу */
-    border-radius: 5px;          /* Скругляем углы */
-    cursor: pointer;              /* Указываем, что это кнопка */
-}
-.button_Redact:hover {
-    background-color: #bdaa00;   /* Цвет фона при наведении */
-}
-.large_text {
-    font-size: 48px; /* Устанавливаем размер шрифта */
-    font-weight: bold; /* Делаем текст жирным */
-    color: #333; /* Цвет текста */
-}
-.image-button {
-    background: none; /* Убираем фоновый цвет */
-    border: none; /* Убираем рамку */
-    cursor: pointer; /* Указываем, что это кнопка */
-    padding: 0; /* Убираем отступы */
-}
-.image-button img {
-    width: 100px; /* Ширина картинки */
-    height: auto; /* Автоматическая высота для сохранения пропорций */
+.container2 {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 20px;
 }
 
-.button-custom {
-    background-color: #d6a82a; /* Основной цвет фона */
-    color: white; /* Цвет текста */
-    font-family: 'Arial', sans-serif; /* Шрифт */
-    padding: 12px 24px; /* Внутренние отступы */
-    text-align: center; /* Выравнивание текста по центру */
-    text-decoration: none; /* Убираем подчеркивание */
-    border: none; /* Без границы */
-    border-radius: 5px; /* Скругленные углы */
-    font-size: 16px; /* Размер шрифта */
-    cursor: pointer; /* Указатель при наведении */
-    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s; /* Плавный переход */
-    box-shadow: 0 0 5px rgba(195, 167, 77, 0.5); /* Эффект свечения */
-    margin-left: 10px;
+/* Шапка */
+.header__img {
+    height: 48px;
 }
 
-.button-custom:hover {
-    background-color: #e6b824; /* Цвет фона при наведении */
-    transform: translateY(-2px); /* Легкий подъем при наведении */
-    box-shadow: 0 0 15px rgba(195, 167, 77, 0.8); /* Увеличенное свечение при наведении */
+/* Карточки */
+.card {
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #2c2c2c;
+    color: white;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
+.card-header {
+    background-color: var(--primary-color); /* Золотой цвет из вашей палитры */
+    background: linear-gradient(135deg, var(--primary-color) 0%, #e6b824 100%);
+    border-bottom: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+}
+
+/* Кнопки и ссылки */
+.button-custom,
 .link-custom {
-    display: inline-block; /* Чтобы стили кнопки применялись корректно */
-    background-color: #d6a82a; /* Основной цвет фона */
-    color: white; /* Цвет текста */
-    font-family: 'Arial', sans-serif; /* Шрифт */
-    padding: 12px 24px; /* Внутренние отступы */
-    text-align: center; /* Выравнивание текста по центру */
-    text-decoration: none; /* Убираем подчеркивание */
-    border-radius: 5px; /* Скругленные углы */
-    font-size: 16px; /* Размер шрифта */
-    cursor: pointer; /* Указатель при наведении */
-    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s; /* Плавный переход */
-    box-shadow: 0 0 5px rgba(195, 167, 77, 0.5); /* Эффект свечения */
-    margin-right: 10px;
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    padding: 12px 24px;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+    border: none;
+    margin: 0 10px 10px 0;
 }
 
+.button-custom:hover,
 .link-custom:hover {
-    background-color: #e6b824; /* Цвет фона при наведении */
-    transform: translateY(-2px); /* Легкий подъем при наведении */
-    box-shadow: 0 0 15px rgba(195, 167, 77, 0.8); /* Увеличенное свечение при наведении */
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
 }
-.link-custom-pay{
-    display: inline-block; /* Чтобы стили кнопки применялись корректно */
-    background-color: #0f9b22; /* Основной цвет фона */
-    color: white; /* Цвет текста */
-    font-family: 'Arial', sans-serif; /* Шрифт */
-    padding: 12px 24px; /* Внутренние отступы */
-    text-align: center; /* Выравнивание текста по центру */
-    text-decoration: none; /* Убираем подчеркивание */
-    border-radius: 5px; /* Скругленные углы */
-    font-size: 16px; /* Размер шрифта */
-    cursor: pointer; /* Указатель при наведении */
-    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s; /* Плавный переход */
-    box-shadow: 0 0 5px rgba(56, 245, 9, 0.466); /* Эффект свечения */
-    margin-right: 10px;
+
+.link-custom-pay {
+    background-color: var(--success-color);
+    box-shadow: 0 0 5px rgba(56, 245, 9, 0.466);
 }
+
 .link-custom-pay:hover {
-    background-color: #2ad641; /* Цвет фона при наведении */
-    transform: translateY(-2px); /* Легкий подъем при наведении */
-    box-shadow: 0 0 15px rgba(56, 245, 9, 0.8); /* Увеличенное свечение при наведении */
+    background-color: var(--success-hover);
+    box-shadow: 0 0 15px rgba(56, 245, 9, 0.8);
 }
-footer{
-    background-color: #161415;
+
+.button_Redact {
+    padding: 10px 20px;
+    background-color: #000000;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
+
+.button_Redact:hover {
+    background-color: var(--primary-hover);
+}
+
+/* Формы */
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.form-control {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0.75rem;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(214, 168, 42, 0.25);
+    color: white;
+}
+
+/* Изображения */
+.cover__img {
+    max-width: 50%;
+    height: auto;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.image-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.image-button img {
+    width: 100px;
+    height: auto;
+    transition: transform 0.3s;
+}
+
+.image-button img:hover {
+    transform: scale(1.05);
+}
+
+/* Текст */
+.large_text {
+    font-size: 48px;
+    font-weight: bold;
+    color: #333;
+}
+
+.title_book {
+    margin-bottom: 10px;
+}
+
+/* О нас */
 .about-us {
-    font-family: 'Arial', sans-serif; /* Шрифт для читаемости */
-    line-height: 1.6; /* Высота строки для удобства чтения */
-    color: #cba76c; /* Темный цвет текста */
+    line-height: 1.6;
+    color: #cba76c;
     background-color: #161415;
+    padding: 20px;
+    border-radius: 10px;
 }
-.about-us h1 {
-    color: #d3a151; /* Темно-синий цвет заголовков */
-}
-.about-us h2 {
-    font-size: 2em; /* Размер шрифта для заголовков */
-    color: #d3a151;
-}
+
+.about-us h1,
+.about-us h2,
 .about-us h3 {
-    font-size: 1.5em; /* Размер шрифта для подзаголовков */
     color: #d3a151;
+}
+
+.about-us h2 {
+    font-size: 2em;
+}
+
+.about-us h3 {
+    font-size: 1.5em;
+}
+
+/* Футер */
+footer {
+    background-color: #161415;
+    color: white;
+    padding: 20px 0;
+    margin-top: 30px;
+}
+
+/* Адаптация */
+@media (max-width: 768px) {
+    .cover__img {
+        max-width: 100%;
+    }
+    
+    .large_text {
+        font-size: 36px;
+    }
+    
+    .button-custom,
+    .link-custom {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
+.text-gold {
+    color: var(--primary-color);
+}
+
+.border-gold {
+    border-color: var(--primary-color) !important;
+}
+
+.btn-gold {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+.btn-gold:hover {
+    background-color: var(--primary-hover);
+    color: white;
+}
+
+.btn-outline-gold {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-gold:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.form-control.bg-dark:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(214, 168, 42, 0.25);
+}
+
+.bg-dark {
+    background-color: #1e1e1e !important;
 }
