@@ -1,7 +1,68 @@
 {% extends 'base.html' %}
 
 {% block title %}Добавление книги{% endblock %}
+<style>
+/* Обновленные стили для фона и контейнера */
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
 
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url(/static/image/background.jpg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    z-index: -1;
+    /* Затемнение фона для лучшей читаемости */
+    background-color: rgba(0, 0, 0, 0.5);
+    background-blend-mode: overlay;
+}
+
+.container-fluid {
+    flex: 1;
+    background-color: rgba(30, 30, 30, 0.85);
+    padding: 2rem;
+    backdrop-filter: blur(5px);
+}
+
+/* Адаптивные отступы */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid {
+        padding: 1rem;
+    }
+}
+
+/* Остальные стили остаются как в предыдущем варианте */
+.cover-img-lg {
+    max-height: 500px;
+    width: 100%;
+    object-fit: contain;
+    border: 2px solid var(--primary-color);
+    transition: transform 0.3s ease;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 0.5rem;
+    border-radius: 5px;
+}
+</style>>
 {% block body %}
 <div class="container mt-4">
     <div class="row justify-content-center">
@@ -10,7 +71,20 @@
                 <div class="card-header bg-primary text-white">
                     <h2 class="mb-0"><i class="bi bi-book-plus"></i> Добавление новой книги</h2>
                 </div>
-                
+
+                <div class="card-body bg-dark text-light">
+                    <!-- Flash сообщения -->
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            <div class="alert alert-gold mb-4">
+                                <ul class="mb-0 ps-3">
+                                {% for message in messages %}
+                                    <li>{{ message }}</li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
                 <div class="card-body">
                     <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                         <div class="row g-3">
@@ -45,14 +119,12 @@
                                 <label for="cover" class="form-label">Обложка*</label>
                                 <input class="form-control" type="file" id="cover" name="cover" accept="image/*" required>
                                 <div class="invalid-feedback">Выберите файл обложки</div>
-                                <div class="form-text">Рекомендуемый размер: 600×800 px</div>
                             </div>
                             
                             <div class="col-12">
                                 <label for="book_file" class="form-label">Файл книги*</label>
                                 <input class="form-control" type="file" id="book_file" name="book_file" required>
                                 <div class="invalid-feedback">Выберите файл книги</div>
-                                <div class="form-text">Поддерживаемые форматы: PDF, EPUB, FB2, TXT</div>
                             </div>
                             
                             <div class="col-12 mt-4">

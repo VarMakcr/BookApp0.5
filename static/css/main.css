@@ -1,4 +1,4 @@
-/* Основные переменные */
+/* Оптимизированный CSS */
 :root {
     --primary-color: #d6a82a;
     --primary-hover: #e6b824;
@@ -7,249 +7,232 @@
     --shadow-hover: 0 0 15px rgba(195, 167, 77, 0.8);
     --success-color: #0f9b22;
     --success-hover: #2ad641;
+    --error-color: #ffca2c;
+    --error-bg: rgba(255, 202, 44, 0.1);
+    --dark-bg: #1e1e1e;
+    --darker-bg: #161415;
+    --gold-gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
 }
 
-/* Общие стили */
+/* Базовые стили */
 body {
-    background-color: rgb(255, 255, 255);
     margin: 0;
     padding: 0;
-    height: 100vh;
-    background-image: url(/static/image/background.jpg);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    min-height: 100vh;
     font-family: 'Arial', sans-serif;
+    display: flex;
+    flex-direction: column;
+    background: url(/static/image/background.jpg) center/cover no-repeat fixed, 
+                rgb(255, 255, 255);
 }
-.header_book {
-    display: flex;                 /* Включаем Flexbox */
-    justify-content: space-between; /* Распределяем элементы по ширине */
-    align-items: center;          /* Центрируем по вертикали */
-}
+
+/* Компоненты */
 .container2 {
     background-color: white;
     border-radius: 10px;
+    padding: 2rem;
     box-shadow: var(--shadow);
-    padding: 20px;
 }
 
-/* Шапка */
+.header_book {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
 .header__img {
     height: 48px;
+    transition: transform 0.3s ease;
 }
 
-/* Карточки */
 .card {
     border: none;
     border-radius: 10px;
     overflow: hidden;
-    background-color: #2c2c2c;
-    color: white;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: var(--dark-bg);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
 }
-
 .card:hover {
     transform: translateY(-5px);
     box-shadow: var(--shadow-hover);
 }
 
 .card-header {
-    background-color: var(--primary-color); /* Золотой цвет из вашей палитры */
-    background: linear-gradient(135deg, var(--primary-color) 0%, #e6b824 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
     border-bottom: none;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    padding: 1.5rem;
+    padding: 1.25rem 1.5rem;
 }
+/* Утилиты */
+.text-gold { color: var(--primary-color); }
+.border-gold { border-color: var(--primary-color) !important; }
+.bg-gold { background: var(--gold-gradient); }
+.bg-dark { background-color: var(--dark-bg) !important; }
+.bg-darker { background-color: var(--darker-bg) !important; }
+.text-muted { color: #aaa !important; }
 
-/* Кнопки и ссылки */
+/* Кнопки и интерактивные элементы */
 .button-custom,
-.link-custom {
-    display: inline-block;
-    background-color: var(--primary-color);
-    color: var(--text-color);
-    padding: 12px 24px;
-    text-align: center;
-    text-decoration: none;
+.link-custom,
+.btn-gold,
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
     border-radius: 5px;
-    font-size: 16px;
+    font-size: 1rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: var(--shadow);
+    text-decoration: none;
     border: none;
-    margin: 0 10px 10px 0;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    box-shadow: var(--shadow);
+}
+
+.btn-outline-gold {
+    background-color: transparent;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
 }
 
 .button-custom:hover,
-.link-custom:hover {
+.link-custom:hover,
+.btn-gold:hover,
+.btn-primary:hover,
+.btn-outline-gold:hover {
     background-color: var(--primary-hover);
     transform: translateY(-2px);
     box-shadow: var(--shadow-hover);
-}
-
-.link-custom-pay {
-    background-color: var(--success-color);
-    box-shadow: 0 0 5px rgba(56, 245, 9, 0.466);
-}
-
-.link-custom-pay:hover {
-    background-color: var(--success-hover);
-    box-shadow: 0 0 15px rgba(56, 245, 9, 0.8);
-}
-
-.button_Redact {
-    padding: 10px 20px;
-    background-color: #000000;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.button_Redact:hover {
-    background-color: var(--primary-hover);
+    color: var(--text-color);
 }
 
 /* Формы */
 .form-label {
+    display: block;
     font-weight: 500;
     margin-bottom: 0.5rem;
     color: var(--primary-color);
 }
 
 .form-control {
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: white;
-    padding: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
     border-radius: 5px;
     transition: all 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
 }
 
 .form-control:focus {
     background-color: rgba(255, 255, 255, 0.2);
     border-color: var(--primary-color);
     box-shadow: 0 0 0 0.25rem rgba(214, 168, 42, 0.25);
-    color: white;
 }
 
 /* Изображения */
-.cover__img {
-    max-width: 50%;
-    height: auto;
-    margin-bottom: 10px;
+.cover__img,
+.cover-img-lg {
+    width: auto;
+    max-width: 100%;
     border-radius: 5px;
+    transition: transform 0.3s ease;
+    object-fit: contain;
 }
 
+.cover__img {
+    max-height: 250px;
+}
+
+.cover-img-lg {
+    max-height: 500px;
+    border: 2px solid var(--primary-color);
+}
+.cover__img:hover {
+    transform: scale(1.03);
+}
 .image-button {
     background: none;
     border: none;
     cursor: pointer;
     padding: 0;
+    transition: transform 0.3s ease;
 }
 
-.image-button img {
-    width: 100px;
-    height: auto;
-    transition: transform 0.3s;
+/* Состояния */
+.is-invalid {
+    border-color: var(--error-color) !important;
 }
 
-.image-button img:hover {
-    transform: scale(1.05);
+.is-invalid:focus {
+    box-shadow: 0 0 0 0.25rem rgba(255, 202, 44, 0.25) !important;
 }
 
-/* Текст */
-.large_text {
-    font-size: 48px;
-    font-weight: bold;
-    color: #333;
+.invalid-feedback {
+    display: block;
+    color: var(--error-color) !important;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    padding-left: 0.25rem;
+    font-weight: 500;
 }
 
-.title_book {
-    margin-bottom: 10px;
+/* Специальные компоненты */
+.book-description {
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 3px solid var(--primary-color);
+    padding: 1rem;
+    border-radius: 0 5px 5px 0;
 }
 
-/* О нас */
-.about-us {
-    line-height: 1.6;
-    color: #cba76c;
-    background-color: #161415;
-    padding: 20px;
+.price-tag {
+    border: 1px solid var(--success-color);
+    background-color: rgba(15, 155, 34, 0.1);
+}
+
+.empty-state {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: rgba(214, 168, 42, 0.05);
     border-radius: 10px;
-}
-
-.about-us h1,
-.about-us h2,
-.about-us h3 {
-    color: #d3a151;
-}
-
-.about-us h2 {
-    font-size: 2em;
-}
-
-.about-us h3 {
-    font-size: 1.5em;
-}
-
-/* Футер */
-footer {
-    background-color: #161415;
-    color: white;
-    padding: 20px 0;
-    margin-top: 30px;
+    border: 1px dashed var(--primary-color);
 }
 
 /* Адаптация */
 @media (max-width: 768px) {
-    .cover__img {
-        max-width: 100%;
+    .container2 {
+        padding: 1.5rem;
     }
     
-    .large_text {
-        font-size: 36px;
+    .header_book {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .cover__img {
+        max-height: 200px;
+    }
+    
+    .cover-img-lg {
+        max-height: 350px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-state {
+        padding: 1.5rem;
     }
     
     .button-custom,
     .link-custom {
         width: 100%;
-        margin: 5px 0;
+        margin: 0.5rem 0;
     }
-}
-.text-gold {
-    color: var(--primary-color);
-}
-
-.border-gold {
-    border-color: var(--primary-color) !important;
-}
-
-.btn-gold {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-}
-
-.btn-gold:hover {
-    background-color: var(--primary-hover);
-    color: white;
-}
-
-.btn-outline-gold {
-    color: var(--primary-color);
-    border-color: var(--primary-color);
-}
-
-.btn-outline-gold:hover {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.form-control.bg-dark:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.25rem rgba(214, 168, 42, 0.25);
-}
-
-.bg-dark {
-    background-color: #1e1e1e !important;
 }

@@ -5,104 +5,81 @@
 {% endblock %}
 
 {% block body %}
-<div class="header_book ms-3">
-    <h1 class="title_book">{{ book.Title }}</h1>
-    <div class="text-end me-2"style="margin-top: 10px;">
-        {%if admin: %}
-        <a href="/book/{{book.id}}/del" class="button-custom me-2" onclick="showAlert()">Удалить</a>
-        <a href="/book/{{book.id}}/edit" class="button-custom me-2">Редактировать</a>
-        <script>
-          function showAlert(){
-            alert("Вы действительно хотите удалить?");
-          }
-        </script>
-        {%endif%}
-        <a href="/Main" class="button-custom me-2">Назад к каталогу</a>  
-         
-    </div>
-</div> 
- <div class="container ms-3">
-    <div style="display: flex; justify-content: space-between;">
-      <img class = "cover__img " src="{{book.cover_url}}" alt="Обложка">
-          {%if 'username' in session and admin == False: %}
-          <form action="{{ url_for('add_bookmark', book_id=book.id) }}" method="post" id="bookmarkForm">
-                  <button type="button"class="image-button" id="bookmarkButton" onclick="pay()">
-                      <img id="bookmarkImage" src="{{ url_for('static', filename='image/common_bookmark.png') }}">
-                  </button>
-              </form>
-          {% endif %}
+
+<div class="container-fluid bg-dark text-light p-4">
+    <!-- Шапка с заголовком и кнопками -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <h1 class="text-gold mb-3 mb-md-0">
+            <i class="bi bi-book me-2"></i>{{ book.Title }}
+        </h1>
+        {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            <div class="alert alert-gold mb-4">
+                                <ul class="mb-0 ps-3">
+                                {% for message in messages %}
+                                    <li>{{ message }}</li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+        <div class="d-flex flex-wrap gap-2">
+            {% if admin %}
+            <a href="/book/{{book.id}}/del" class="btn btn-outline-danger" onclick="return confirm('Вы действительно хотите удалить эту книгу?');">
+                <i class="bi bi-trash me-1"></i>Удалить
+            </a>
+            <a href="/book/{{book.id}}/edit" class="btn btn-outline-gold">
+                <i class="bi bi-pencil me-1"></i>Редактировать
+            </a>
+            {% endif %}
+            <a href="/Main" class="btn btn-outline-gold">
+                <i class="bi bi-arrow-left me-1"></i>К каталогу
+            </a>
+        </div>
     </div>
     
-    <h3>Автор: {{ book.Author }}</h3>
-    <p>{{ book.About }}</p>
-    {%if admin or existing_bookmark: %} 
-      <a href="{{ url_for('read_book', book_id=book.id) }}" class="button-custom me-2">Читать</a><br>
-    {%else%}
-      <div style="display: flex;">
-        <a class="link-custom-pay ">Цена: {{ book.Cost }} USD</a>
-        <form action="{{ url_for('create_payment', book_id=book.id) }}" method="POST">
-        <button type="submit" class="button-custom ">Купить через PayPal</button>
-        </form>
-      </div>
-    {%endif%}
-
-
-    <!--
-          {%if 'username' in session and admin == False and existing_bookmark == False: %}
-          <form action="{{ url_for('add_bookmark', book_id=book.id) }}" method="post" id="bookmarkForm">
-                  <button type="button"class="image-button" id="bookmarkButton" onclick="pay()">
-                      <img id="bookmarkImage" src="{{ url_for('static', filename='image/common_bookmark.png') }}">
-                  </button>
-              </form>
-          {% endif %}
-
-    <a href="{{ url_for('read_book', book_id=book.id) }}" class="button-custom me-2">Читать</a><br> 
-    -->
-
-
- </div>
- <script>
-    function pay() {
-        const img = document.getElementById('bookmarkImage');
-        const bookId = {{ book.id }}; // Получаем ID книги из контекста
-
-        fetch(`/add_bookmark/${bookId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => {
-            if (response.ok) {
-                // Меняем изображение в зависимости от состояния
-                if (img.src.includes('common_bookmark.png')) {
-                    img.src = "{{ url_for('static', filename='image/bookmark_get.png') }}"; // Закладка добавлена
-                } else {
-                    img.src = "{{ url_for('static', filename='image/common_bookmark.png') }}"; // Закладка убрана
-                }
-            }
-        });
-    }
-    function onPageLoad() {
-        const img = document.getElementById('bookmarkImage');
-        const bookId = {{ book.id }};
+    <!-- Основное содержимое -->
+    <div class="row g-4">
+        <!-- Обложка и закладка -->
+        <div class="col-md-5 col-lg-4">
+            <div class="position-relative">
+                <img class="img-fluid rounded shadow cover-img-lg" src="{{book.cover_url}}" alt="Обложка книги {{book.Title}}">
+            </div>
+        </div>
         
-        // Здесь можно сделать запрос на сервер для проверки наличия закладки
-        fetch(`/check_bookmark/${bookId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.has_bookmark) {
-                img.src = "{{ url_for('static', filename='image/bookmark_get.png') }}"; // Закладка существует
-            } else {
-                img.src = "{{ url_for('static', filename='image/common_bookmark.png') }}"; // Закладка не существует
-            }
-        });
-    }
-    document.addEventListener('DOMContentLoaded', onPageLoad);
-  </script>
-
+        <!-- Информация о книге -->
+        <div class="col-md-7 col-lg-8">
+            <div class="bg-darker rounded p-4 h-100">
+                <h3 class="text-gold mb-3">
+                    <i class="bi bi-person me-2"></i>Автор: {{ book.Author }}
+                </h3>
+                
+                <div class="book-description mb-4">
+                    <h4 class="text-gold mb-2">Описание:</h4>
+                    <p class="mb-0">{{ book.About }}</p>
+                </div>
+                
+                <!-- Блок чтения/покупки -->
+                <div class="mt-auto">
+                    {% if admin or existing_bookmark %}
+                    <a href="{{ url_for('read_book', book_id=book.id) }}" class="btn btn-gold btn-lg">
+                        <i class="bi bi-book-half me-2">Читать</i>
+                    </a>
+                    {% else %}
+                    <div class="d-flex flex-column flex-sm-row align-items-center gap-3">
+                        <div class="price-tag bg-success bg-opacity-10 px-3 py-2 rounded">
+                            <span class="text-success fw-bold">{{ book.Cost }} USD</span>
+                        </div>
+                        <form action="{{ url_for('create_payment', book_id=book.id) }}" method="POST" class="w-100 w-sm-auto">
+                            <button type="submit" class="btn btn-success btn-lg w-100">
+                                <i class="bi bi-paypal me-2"></i>Купить через PayPal
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
-
-
-
-

@@ -5,17 +5,54 @@
 {% endblock %}
 
 {% block body %}
-<h1 class="item ms-3">Авторизируйтесь</h1>
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
-        {% for message in messages %}
-            <p class="item ms-3" >{{ message }}</p>
-        {% endfor %}
-    {% endif %}
-{% endwith %}
-<form method="post" class="form-control">
-    <input type="text" name="Login" placeholder="Вводите логин" class="form-control"><br>
-    <input type="text" name="Password" placeholder="Вводите пароль" class="form-control"><br>
-    <button class="button-custom" type="submit">Войти</button>
-</form>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-gold text-white">
+                    <h2 class="mb-0"><i class="bi bi-person-plus me-2"></i>Авторизация</h2>
+                </div>
+                
+                <div class="card-body bg-dark text-light">
+                    <!-- Flash сообщения -->
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            <div class="alert alert-gold mb-4">
+                                <ul class="mb-0 ps-3">
+                                {% for message in messages %}
+                                    <li>{{ message }}</li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <form method="post" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="Login" class="form-label">Логин</label>
+                            <input type="text" id="Login" name="Login" 
+                                   class="form-control bg-dark text-light border-secondary" 
+                                   placeholder="Введите логин" required>
+                            <div class="invalid-feedback">Пожалуйста, введите логин</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="Password" class="form-label">Пароль</label>
+                            <input type="password" id="Password" name="Password" 
+                                   class="form-control bg-dark text-light border-secondary" 
+                                   placeholder="Введите пароль" required>
+                            <div class="invalid-feedback">Пожалуйста, введите пароль</div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button class="btn btn-gold py-2" type="submit">
+                                <i class="bi bi-person-check me-2"></i>Войти
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

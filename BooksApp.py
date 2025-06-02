@@ -121,9 +121,10 @@ def logout():
 def Main():
     username = session.get('username') 
     books = Books.query.all()
+    
     admin=False
     if 'username' not in session:
-        return render_template('Main.html', books=books)
+        return render_template('Main.html', books=books, existing_bookmark= False)
     else:
         user = Authorization.query.filter_by(Name=username).first()
         if user.Rank == 'Admin':
@@ -139,11 +140,11 @@ def book_detail(id):
     user = Authorization.query.filter_by(Name=username).first()
     admin = adm()
     if 'username' not in session:
-        return render_template('Book.html', book=book,existing_bookmark=False)#, cover_url = cover_url
+        return render_template('Book.html', book=book,existing_bookmark=False)
     else:
         existing_bookmark = Bookmark.query.filter_by(user_id=user.id, book_id=id).first()
         
-        return render_template('Book.html', book=book, username=username, admin=admin, existing_bookmark=existing_bookmark) #cover_url = cover_url,
+        return render_template('Book.html', book=book, username=username, admin=admin, existing_bookmark=existing_bookmark)
 
 #Добавление книг в базу данных
 def allowed_file(filename):
@@ -333,7 +334,7 @@ def Bookmarks():
     username = session.get('username')
     user = Authorization.query.filter_by(Name=session['username']).first()
     bookmarks = Bookmark.query.filter_by(user_id=user.id).options(    db.joinedload(Bookmark.book)    ).all()
-    return render_template('Bookmarks.html', bookmarks=bookmarks,  username=username)
+    return render_template('Bookmarks.html', bookmarks=bookmarks,  username=username, admin=adm())
 
 #Добавление закладок
 @app.route('/add_bookmark/<int:book_id>', methods=['POST'])
@@ -394,17 +395,13 @@ def search_books():
     title = request.args.get('title', '')
     books = []
     username = session.get('username')
-    user = Authorization.query.filter_by(Name=username).first()
     if title:
         books = Books.query.filter(Books.Title.ilike(f'%{title}%')).all()  # Поиск с нечувствительностью к регистру
     if 'username' not in session:
         return render_template('Main.html', books=books) # Возвращаем шаблон если зарегистрирован
         # Проверка ранга пользователя
-    if user.Rank == 'Admin':
-        admin = True
-        return render_template('Main.html', books=books, username=username, admin = admin)  # Перенаправление для админа
     else:
-        return render_template('Main.html', books=books, username=username)  # Перенаправление для обычного пользователя
+        return render_template('Main.html', books=books, username=username, admin = adm())  # Перенаправление для обычного пользователя
 
 def adm():
     username=session.get('username')
@@ -436,7 +433,7 @@ def create_admin_user():
     if not admin_user:
         new_admin = Authorization(
             Name='admin',
-            Password=generate_password_hash('admin!secure!pswrd'),  # Замените на ваш пароль
+            Password=generate_password_hash('admin!secure!pswrd'),
             Rank='Admin'
         )
         db.session.add(new_admin)

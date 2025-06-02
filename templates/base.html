@@ -191,7 +191,7 @@
                                 {{username}}
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
-                              {% if admin ==false %}
+                              {% if admin == false %}
                                 <li><a class="dropdown-item" href="{{url_for('Bookmarks')}}">Мои книги</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="/">Личный кабинет</a></li>
@@ -205,9 +205,9 @@
             </div>
         </header>
 
-     <div class="container2"> 
-                {% block body %}{% endblock %}
-            </div>
+
+        {% block body %}{% endblock %}
+
         </div>
     </div>
   <div class="container">
@@ -243,7 +243,7 @@
             </div>
             
             <div class="text-center pt-3 mt-3" style="border-top: 1px solid var(--primary-color);">
-                <p class="mb-0">© 2023 AppBooks. Все права защищены.</p>
+                <p class="mb-0">© 2025 AppBooks. Все права защищены.</p>
             </div>
         </div>
     </footer>

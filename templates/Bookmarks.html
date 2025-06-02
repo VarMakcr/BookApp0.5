@@ -5,42 +5,59 @@
 {% endblock %}
 
 {% block body %}
-    <div class="header_book ms-3">
-        <h1 class="item ms-3">Мои книги</h1> 
-        <div class="text-end me-2"style="margin-top: 10px;">
-            <a href="/Main " class="link-custom">Назад к каталогу</a>  
+<div class="container-fluid bg-dark text-light p-4 min-vh-100">
+    <!-- Заголовок и кнопка назад -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <h1 class="text-gold mb-3 mb-md-0">
+            <i class="bi bi-bookmark-heart-fill me-2"></i>Мои книги
+        </h1>
+        
+        <div>
+            <a href="/Main" class="btn btn-outline-gold">
+                <i class="bi bi-arrow-left me-1"></i>Назад к каталогу
+            </a>
         </div>
     </div>
-  
-    <div class="row ms-3"></div>
 
-    {% if bookmarks|length > 0 %}
-        {% for bookmark in bookmarks %}
-            <div class="col-md-6 item ms-3">
-                <a href="{{ url_for('book_detail', id=bookmark.book.id) }}"><h4>{{ bookmark.book.Title }}</h4></a>
-                <h1 class="title_book "> </h1>
-                <img class = "cover__img" src="{{url_for('static', filename=bookmark.book.Cover)}}">
-                <h4 class="item ">{{ bookmark.book.Author }}</h4>
+    <!-- Список книг -->
+    <div class="row g-4">
+        {% if bookmarks|length > 0 %}
+            {% for bookmark in bookmarks %}
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <div class="card h-100 border-gold bg-darker">
+                    <div class="card-body d-flex flex-column">
+                        <a href="{{ url_for('book_detail', id=bookmark.book.id) }}" class="text-decoration-none">
+                            <h4 class="text-gold mb-3 text-truncate">{{ bookmark.book.Title }}</h4>
+                        </a>
+                        
+                        <div class="text-center mb-3 flex-grow-1">
+                            <img class="cover__img img-fluid rounded" 
+                                 src="{{bookmark.book.cover_url}}" 
+                                 alt="{{ bookmark.book.Title }}">
+                        </div>
+                        
+                        <div class="mt-auto">
+                            <h5 class="text-muted">
+                                <i class="bi bi-person me-2"></i>{{ bookmark.book.Author }}
+                            </h5>
+                        </div>
+                    </div>
+                </div>
             </div>
-        {% endfor %}
-    {%else%}
-        <p class="large_text">На данный момент нет книг</p>
-    {%endif%}
-    </div >
-{% endblock %}
-<footer class="text  text-white py-4">
-  <div class="container">
-    <div class="about-us d-flex flex-wrap align-items-center justify-content-between"> 
-      <div>
-        <h1>Контакты</h1>
-        <p>Телефон: +7999-999-99-99</p>
-        <p>Почта: appbooks@gmail.com</p>
-      </div>
-      <div>
-        <h1>Реквизиты</h1>
-        <a href="/Main"><img class="header__img" src="static/image/telegram_theme.png" alt="Телеграм"></a>
-        <a href="/Main"><img class="header__img" src="static/image/vk_theme.png" alt="ВК"></a>
-      </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <div class="empty-state">
+                    <i class="bi bi-bookmark-x text-gold" style="font-size: 3rem;"></i>
+                    <h3 class="text-gold mt-3">В вашей коллекции пока нет книг</h3>
+                    <p class="text-muted">Начните добавлять книги из каталога</p>
+                    <a href="/Main" class="btn btn-gold mt-3">
+                        <i class="bi bi-book me-1"></i>Перейти в каталог
+                    </a>
+                </div>
+            </div>
+        {% endif %}
     </div>
-  </div>
-</footer>
+</div>
+{% endblock %}
+
