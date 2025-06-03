@@ -41,6 +41,11 @@
                                 <i class="bi bi-person me-2"></i>{{ bookmark.book.Author }}
                             </h5>
                         </div>
+                        <div class="mt-auto text-center">
+                            <a href="{{ url_for('book_detail', id=book.id) }}" class="btn btn-gold w-100 py-2">
+                                <i class="bi bi-info-circle me-2"></i>Подробнее
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
