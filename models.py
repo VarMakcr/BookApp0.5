@@ -1,3 +1,5 @@
+import datetime
+from time import timezone
 from flask import url_for
 from extension import db
 import os
@@ -8,6 +10,10 @@ class Authorization(db.Model):
     Name = db.Column(db.String(100), nullable = False)
     Password = db.Column(db.String(100), nullable = False)
     Rank = db.Column(db.String(100), nullable = False)
+    email = db.Column(db.String(100), nullable=False, unique=True)  # Добавляем email
+    email_confirmed = db.Column(db.Boolean, default=False)  # Подтвержден ли email
+    email_confirmation_token = db.Column(db.String(100))  # Токен для подтверждения
+    token_expiration = db.Column(db.DateTime)  # Срок действия токена
     pass
 #База данных книг
 class Books(db.Model):
@@ -42,7 +48,11 @@ class Bookmark(db.Model):
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('authorization.id'), nullable=False)  
-    book_id = db.Column(db.Integer, db.ForeignKey("books.id"))
-    status = db.Column(db.String(20), default="pending")  # pending/paid/failed
-    paypal_payment_id = db.Column(db.String(50))  # ID платежа PayPal
-    pass
+    book_id = db.Column(db.Integer, db.ForeignKey("books.id"), nullable=False)  # Changed to nullable=False
+    status = db.Column(db.String(20), default="pending")
+    paypal_payment_id = db.Column(db.String(50))
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow())
+    
+    # Explicit relationship
+    book = db.relationship('Books', backref='orders')
+    user = db.relationship('Authorization', backref='orders')

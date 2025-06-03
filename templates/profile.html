@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Личный кабинет
+{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Боковая панель профиля -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h4>Профиль</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-user-circle fa-5x text-secondary"></i>
+                    </div>
+                    <h5 class="card-title">{{ user.Name }}</h5>
+                    <p class="card-text">Email: {{ user.email }}</p>
+                    <p class="card-text">Статус: 
+                        <span class="badge bg-{% if admin %}danger{% else %}success{% endif %}">
+                            {% if admin %}Администратор{% else %}Пользователь{% endif %}
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <!-- Основная информация -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h4>Мои заказы</h4>
+                </div>
+ <div class="card-body">
+                    {% if orders %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Книга</th>
+                                        <th>Дата</th>
+                                        <th>Статус</th>
+                                        <th>Сумма</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in orders %}
+                                    <tr>
+                                        <td>{{ order.id }}</td>
+                                        <td>
+                                            {% if order.book %}
+                                                <a href="{{ url_for('book_detail', id=order.book_id) }}">
+                                                    {{ order.book.Title }}
+                                                </a>
+                                            {% else %}
+                                                Книга удалена
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                                        <td>
+                                            <span class="badge 
+                                                {% if order.status == 'paid' %}bg-success
+                                                {% elif order.status == 'pending' %}bg-warning
+                                                {% else %}bg-danger{% endif %}">
+                                                {{ order.status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if order.book %}
+                                                {{ order.book.Cost }} ₽
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p>У вас пока нет заказов</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Закладки -->
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h4>Мои закладки</h4>
+                </div>
+                <div class="card-body">
+                    {% if bookmarks %}
+                        <div class="row">
+                            {% for bookmark in bookmarks %}
+                            <div class="col-md-6 mb-3">
+                                {% if bookmark.book %}
+                                <div class="card h-100">
+                                    <div class="row g-0">
+                                        <div class="col-md-4">
+                                            <img src="{{ bookmark.book.cover_url }}" 
+                                                 class="img-fluid rounded-start" 
+                                                 alt="{{ bookmark.book.Title }}"
+                                                 style="height: 100%; object-fit: cover;">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ bookmark.book.Title }}</h5>
+                                                <p class="card-text">{{ bookmark.book.Author }}</p>
+                                                <a href="{{ url_for('book_detail', id=bookmark.book.id) }}" 
+                                                   class="btn btn-gold w-100 py-2">
+                                                    Открыть
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p>У вас пока нет закладок</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

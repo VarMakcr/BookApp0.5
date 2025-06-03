@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Оплата книги {{ book.Title }}
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid bg-dark text-light p-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Хлебные крошки -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-darker px-3 py-2 rounded">
+                    <li class="breadcrumb-item"><a href="{{ url_for('Main') }}" class="text-gold">Каталог</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('book_detail', id=book.id) }}" class="text-gold">{{ book.Title|truncate(20) }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Оплата</li>
+                </ol>
+            </nav>
+
+            <!-- Заголовок -->
+            <div class="text-center mb-5">
+                <h1 class="text-gold mb-3">
+                    <i class="bi bi-credit-card me-2"></i>Выберите способ оплаты
+                </h1>
+                <p class="lead">Оплата книги "{{ book.Title }}"</p>
+                <div class="price-display bg-success bg-opacity-10 d-inline-block px-4 py-2 rounded">
+                    <span class="text-success fw-bold fs-4">{{ book.Cost }} RUB</span>
+                </div>
+            </div>
+
+            <!-- Способы оплаты -->
+            <div class="row g-4">
+                <!-- PayPal -->
+                <div class="col-md-6">
+                    <div class="payment-method-card h-100 bg-darker rounded p-4 d-flex flex-column">
+                        <div class="text-center mb-3">
+                            <img src="{{ url_for('static', filename='image/paypal-logo.png') }}" alt="PayPal" style="height: 40px;">
+                        </div>
+                        <h3 class="text-gold text-center mb-3">PayPal</h3>
+                        <ul class="payment-features mb-4 ps-3">
+                            <li>Оплата картой или через аккаунт PayPal</li>
+                            <li>Мгновенное подтверждение</li>
+                            <li>Защита покупателя</li>
+                        </ul>
+                        <div class="mt-auto text-center">
+                            <form action="{{ url_for('create_payment', book_id=book.id) }}" method="POST">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    <i class="bi bi-paypal me-2"></i>Оплатить через PayPal
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <!-- Дополнительная информация -->
+            <div class="mt-5 bg-darker rounded p-4">
+                <h4 class="text-gold mb-3"><i class="bi bi-shield-lock me-2"></i>Безопасность платежей</h4>
+                <p>Все платежи защищены 256-битным SSL-шифрованием. Мы не храним данные вашей карты на наших серверах.</p>
+
+            <!-- Кнопка назад -->
+            <div class="text-center mt-4">
+                <a href="{{ url_for('book_detail', id=book.id) }}" class="btn btn-outline-gold">
+                    <i class="bi bi-arrow-left me-1"></i>Вернуться к книге
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .payment-method-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid #333;
+    }
+    .payment-method-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        border-color: #ffc107;
+    }
+    .payment-features li {
+        margin-bottom: 0.5rem;
+        position: relative;
+    }
+    .payment-features li:before {
+        content: "✓";
+        color: #ffc107;
+        margin-right: 0.5rem;
+    }
+</style>
+{% endblock %}

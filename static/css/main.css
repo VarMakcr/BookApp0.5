@@ -236,3 +236,27 @@ body {
         margin: 0.5rem 0;
     }
 }
+/* Добавьте в ваш стиль */
+.profile-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(214, 168, 42, 0.2);
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(214, 168, 42, 0.1);
+}
+
+.badge {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.table {
+    --bs-table-bg: transparent;
+}
+
+.table th {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+}

@@ -7,9 +7,9 @@
         <p>Спасибо за покупку книги "{{ book.Title }}".</p>
         <p>Сумма: 
             {% if book.Cost is number %}
-                ${{ "%.2f"|format(book.Cost) }}
+                {{ "%.2f"|format(book.Cost) }} ₽
             {% else %}
-                ${{ "%.2f"|format(book.Cost|float) }}
+                {{ "%.2f"|format(book.Cost|float) }} ₽
             {% endif %}
         </p>
         {% with messages = get_flashed_messages() %}

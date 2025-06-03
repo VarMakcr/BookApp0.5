@@ -46,10 +46,11 @@
             </div>
             {% endfor %}
         {% else %}
-            <div class="col-12 text-center py-5">
-                <p class="large_text text-gold">  <!-- Стилизованный текст -->
-                    <i class="bi bi-bookmark-x me-2"></i>На данный момент нет доступных книг
-                </p>
+             <div class="col-12 text-center py-5">
+                <div class="empty-state">
+                    <i class="bi bi-bookmark-x text-gold" style="font-size: 3rem;"></i>
+                    <h3 class="text-gold mt-3">На данные момент каталог пуст</h3>
+                </div>
             </div>
         {% endif %}
     </div>

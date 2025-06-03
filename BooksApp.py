@@ -4,12 +4,15 @@ import secrets
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+from flask_mail import Mail, Message
 import logging
 import paypalrestsdk
 import uuid
 from werkzeug.utils import secure_filename
 from extension import db
 from models import Authorization, Books, Bookmark, Order
+from services.email_service import EmailService
+
 
 logging.basicConfig(filename='app.log', level=logging.ERROR)
 
@@ -26,11 +29,23 @@ def create_app():
     app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB
     os.makedirs(os.path.join(app.static_folder, 'uploads', 'covers'), exist_ok=True)
     os.makedirs(os.path.join(app.static_folder, 'uploads', 'books'), exist_ok=True)
+
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USE_SSL'] = False
+    app.config['MAIL_USERNAME'] = 'bookappex@gmail.com'  #Gmail
+    app.config['MAIL_PASSWORD'] = 'amvc rkej gntp ypga'  # Пароль
+    app.config['MAIL_DEFAULT_SENDER'] ='bookappex@gmail.com'
+    
+    mail = Mail(app)
+    app.mail = mail
+
     if not app.secret_key:
         raise ValueError("Не задан FLASK_SECRET_KEY")
     # Инициализация расширений
     db.init_app(app)
-    
+    mail.init_app(app)
     return app
 
 app = create_app()
@@ -66,7 +81,17 @@ def admin_required(f):
 def Registration():
     if request.method == 'POST':
         username = request.form['Login']
+        email = request.form['Email']  # Добавьте поле Email в форму
         pswrd_check = request.form['Password']
+       
+        # Проверка email
+        if not email or '@' not in email:
+            flash('Некорректный email', 'error')
+            return redirect('/Registration')
+            
+        if Authorization.query.filter_by(email=email).first():
+            flash('Этот email уже используется', 'error')
+            return redirect('/Registration')
        
         if Authorization.query.filter_by(Name=username).first():
             flash('Данный логин уже существует!')
@@ -78,19 +103,48 @@ def Registration():
             flash('Пароль должен содержать не менее 6 символов.')
             return redirect('/Registration')
         
-        pswrd = generate_password_hash(request.form['Password'])
-        rank = "User"
-        reg = Authorization(Name = username, Password = pswrd, Rank = rank)
+        token = secrets.token_urlsafe(32)
+        reg = Authorization(
+            Name=username,
+            Password=generate_password_hash(pswrd_check),
+            Rank="User",
+            email=email,
+            email_confirmed=False,
+            email_confirmation_token=token
+        )
         try:
             db.session.add(reg)
             db.session.commit()
+            
+            # Отправка письма подтверждения
+            from services.email_service import EmailService
+            EmailService.send_confirmation(reg, token)
+            
+            flash('Регистрация успешна! Проверьте email для подтверждения.', 'success')
+            return redirect('/Log_in')
+        except Exception as e:
+            db.session.rollback()
+            flash('Ошибка при регистрации', 'error')
+            app.logger.error(f"Registration error: {str(e)}")
+            return redirect('/Registration')
+    
+    return render_template('Registration.html')
 
-            session['username'] = username
-            return redirect('/')
-        except:
-                return 'При регистрации что-то пошло не так'
-    else:        
-        return render_template('Registration.html')
+@app.route("/confirm_email/<token>")
+def confirm_email(token):
+    user = Authorization.query.filter_by(email_confirmation_token=token).first()
+    
+    if not user:
+        flash('Неверная ссылка подтверждения', 'error')
+        return redirect('/')
+    
+    user.email_confirmed = True
+    user.email_confirmation_token = None
+    db.session.commit()
+    
+    flash('Email успешно подтвержден! Теперь вы можете войти.', 'success')
+    return redirect('/Log_in')
+
 #Вход в аккаунт
 @app.route("/Log_in", methods=['POST', 'GET'])
 def Log_in():
@@ -98,15 +152,18 @@ def Log_in():
         username = request.form['Login']
         pswrd = request.form['Password']
         
-        # Поиск пользователя в базе данных
         user = Authorization.query.filter_by(Name=username).first()
         
         if user and check_password_hash(user.Password, pswrd):
+            if not user.email_confirmed:
+                flash('Подтвердите email перед входом', 'error')
+                return redirect('/Log_in')
+                
             session['username'] = username
-            return redirect('/')  # Главная страница
+            return redirect('/')
         else:
-            flash('Неверное имя пользователя или пароль!')
-            return render_template('Log_in.html')
+            flash('Неверные данные', 'error')
+    
     return render_template('Log_in.html')
 #logout       
 @app.route('/logout')
@@ -130,7 +187,29 @@ def Main():
         if user.Rank == 'Admin':
             admin=True
         return render_template('Main.html', books=books, username=username, admin=admin)
-
+#Личный кабинет пользователя
+@app.route('/profile')
+@login_required
+def profile():
+    username = session.get('username')
+    user = Authorization.query.filter_by(Name=username).first()
+    
+    # Получаем все заказы пользователя
+    orders = Order.query.filter_by(user_id=user.id).order_by(Order.created_at.desc()).all()
+    
+    # Получаем все закладки пользователя
+    bookmarks = Bookmark.query.filter_by(user_id=user.id).options(
+        db.joinedload(Bookmark.book)
+    ).all()
+    
+    return render_template(
+        'profile.html',
+        username=username,
+        user=user,
+        orders=orders,
+        bookmarks=bookmarks,
+        admin=adm()
+    )
 #Просмотр книги
 @app.route('/book/<int:id>')
 def book_detail(id):
@@ -238,7 +317,7 @@ def AddBooks():
             app.logger.error(f"Error adding book: {str(e)}")
             return redirect(url_for('AddBooks'))
     
-    return render_template('AddBooks.html', username=username)
+    return render_template('AddBooks.html', username=username, admin=adm())
 
 #Удаление книг
 @app.route("/book/<int:id>/del")
@@ -325,7 +404,8 @@ def BookUpdate(id):
     
     return render_template('Book_edit.html', 
                          book=book, 
-                         username=session.get('username'))
+                         username=session.get('username'),
+                         admin = adm())
 
 #Закладки
 @app.route('/Bookmarks')
@@ -398,10 +478,10 @@ def search_books():
     if title:
         books = Books.query.filter(Books.Title.ilike(f'%{title}%')).all()  # Поиск с нечувствительностью к регистру
     if 'username' not in session:
-        return render_template('Main.html', books=books) # Возвращаем шаблон если зарегистрирован
+        return render_template('Main.html', books=books)
         # Проверка ранга пользователя
     else:
-        return render_template('Main.html', books=books, username=username, admin = adm())  # Перенаправление для обычного пользователя
+        return render_template('Main.html', books=books, username=username, admin = adm())  
 
 def adm():
     username=session.get('username')
@@ -434,7 +514,9 @@ def create_admin_user():
         new_admin = Authorization(
             Name='admin',
             Password=generate_password_hash('admin!secure!pswrd'),
-            Rank='Admin'
+            Rank='Admin',
+            email = 'maxvr117ru@gmail.com',
+            email_confirmed=True,
         )
         db.session.add(new_admin)
         db.session.commit()
@@ -489,14 +571,14 @@ def create_payment(book_id):
             "transactions": [{
                 "amount": {
                     "total": "{0:.2f}".format(float(book.Cost)),
-                    "currency": "USD",
+                    "currency": "RUB",
                 },
                 "description": f"Покупка книги: {book.Title}",
                 "item_list": {
                     "items": [{
                         "name": book.Title,
                         "price": "{0:.2f}".format(float(book.Cost)),
-                        "currency": "USD",
+                        "currency": "RUB",
                         "quantity": 1
                     }]
                 }
@@ -599,6 +681,11 @@ def payment_failed(order_id):
     return render_template("payment_failed.html", 
                          order=order,
                          username=session.get('username'))
+#Способы оплаты
+@app.route('/book/<int:book_id>/payment')
+def payment_options(book_id):
+    book = Books.query.get_or_404(book_id)
+    return render_template('payment_options.html', book=book)
 
 if __name__ == '__main__':
     with app.app_context():

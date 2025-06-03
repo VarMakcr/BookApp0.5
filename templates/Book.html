@@ -68,11 +68,11 @@
                     {% else %}
                     <div class="d-flex flex-column flex-sm-row align-items-center gap-3">
                         <div class="price-tag bg-success bg-opacity-10 px-3 py-2 rounded">
-                            <span class="text-success fw-bold">{{ book.Cost }} USD</span>
+                            <span class="text-success fw-bold">{{ book.Cost }} RUB</span>
                         </div>
-                        <form action="{{ url_for('create_payment', book_id=book.id) }}" method="POST" class="w-100 w-sm-auto">
+                        <form action="{{ url_for('payment_options', book_id=book.id) }}"class="w-100 w-sm-auto">
                             <button type="submit" class="btn btn-success btn-lg w-100">
-                                <i class="bi bi-paypal me-2"></i>Купить через PayPal
+                                <i class="bi bi-paypal me-2"></i>Купить
                             </button>
                         </form>
                     </div>

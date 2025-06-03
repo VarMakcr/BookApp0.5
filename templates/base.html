@@ -194,7 +194,7 @@
                               {% if admin == false %}
                                 <li><a class="dropdown-item" href="{{url_for('Bookmarks')}}">Мои книги</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="/">Личный кабинет</a></li>
+                                <li><a class="dropdown-item" href="{{url_for('profile')}}">Личный кабинет</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 {% endif %}
                                 <li><a class="dropdown-item" href="{{url_for('logout')}}">Выйти</a></li>
