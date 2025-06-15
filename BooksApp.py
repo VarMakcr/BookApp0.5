@@ -178,10 +178,10 @@ def logout():
 def Main():
     username = session.get('username') 
     books = Books.query.all()
-    
+       
     admin=False
     if 'username' not in session:
-        return render_template('Main.html', books=books, existing_bookmark= False)
+        return render_template('Main.html', books=books, existing_bookmark= False, admin=admin)
     else:
         user = Authorization.query.filter_by(Name=username).first()
         if user.Rank == 'Admin':
@@ -326,6 +326,21 @@ def delete_book(id):
     book = Books.query.get_or_404(id)
 
     try:
+        # Проверка наличия покупок этой книги
+        orders_exist = Order.query.filter_by(book_id=id).first()
+        if orders_exist:
+            flash('У пользователей есть покупки этой книги', 'error')
+            flash('Содержимое книги удалено', 'success')
+            book.About = "На данный момент книга: "+"<<"+book.Title+">>"+" удалена"
+            book.Title = "Книга удалена"
+            book.Cover = "Deleted_Cover.png"
+            book_path = os.path.join(app.static_folder, 'uploads', book.File_path)
+
+            if os.path.exists(book_path):
+                os.remove(book_path)
+            db.session.commit()
+            return redirect(url_for('Main'))  
+        
         # Удаление файлов
         cover_path = os.path.join(app.static_folder, 'uploads', book.Cover)
         book_path = os.path.join(app.static_folder, 'uploads', book.File_path)
@@ -338,12 +353,13 @@ def delete_book(id):
         # Удаление из БД
         db.session.delete(book)
         db.session.commit()
-        
+
         flash('Книга успешно удалена!', 'success')
+        return redirect(url_for('Main'))  
     except Exception as e:
         db.session.rollback()
         flash(f'Ошибка при удалении книги: {str(e)}', 'error')
-        app.logger.error(f"Error deleting book {id}: {str(e)}")
+        app.logger.error(f"Error deleting book {id}: {str(e)}") 
     
     return redirect(url_for('Main'))    
 
@@ -685,7 +701,8 @@ def payment_failed(order_id):
 @app.route('/book/<int:book_id>/payment')
 def payment_options(book_id):
     book = Books.query.get_or_404(book_id)
-    return render_template('payment_options.html', book=book)
+
+    return render_template('payment_options.html', book=book, admin = False, username = session.get('username') )
 
 if __name__ == '__main__':
     with app.app_context():
