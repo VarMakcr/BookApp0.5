@@ -331,11 +331,14 @@ def delete_book(id):
         if orders_exist:
             flash('У пользователей есть покупки этой книги', 'error')
             flash('Содержимое книги удалено', 'success')
+            cover_path = os.path.join(app.static_folder, 'uploads', book.Cover)
+            book_path = os.path.join(app.static_folder, 'uploads', book.File_path)
             book.About = "На данный момент книга: "+"<<"+book.Title+">>"+" удалена"
             book.Title = "Книга удалена"
             book.Cover = "Deleted_Cover.png"
-            book_path = os.path.join(app.static_folder, 'uploads', book.File_path)
 
+            if os.path.exists(cover_path):
+                os.remove(cover_path)
             if os.path.exists(book_path):
                 os.remove(book_path)
             db.session.commit()
