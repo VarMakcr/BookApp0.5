@@ -35,7 +35,7 @@ def create_app():
     app.config['MAIL_USE_TLS'] = True
     app.config['MAIL_USE_SSL'] = False
     app.config['MAIL_USERNAME'] = 'bookappex@gmail.com'  #Gmail
-    app.config['MAIL_PASSWORD'] = 'amvc rkej gntp ypga'  # Пароль
+    app.config['MAIL_PASSWORD'] = 'amvc rkej gntp ypga'  # Пароль приложения
     app.config['MAIL_DEFAULT_SENDER'] ='bookappex@gmail.com'
     
     mail = Mail(app)
@@ -532,7 +532,7 @@ def create_admin_user():
     if not admin_user:
         new_admin = Authorization(
             Name='admin',
-            Password=generate_password_hash('admin!secure!pswrd'),
+            Password=generate_password_hash('admin!psw!'),
             Rank='Admin',
             email = 'maxvr117ru@gmail.com',
             email_confirmed=True,
